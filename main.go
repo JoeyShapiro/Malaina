@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"time"
 )
 
 func main() {
+	var medias []Media
 	queue := []int{4081}
 	seen := []int{}
 	watchTime := 0
@@ -45,9 +47,15 @@ loop_queue:
 		}
 
 		fmt.Printf("%+v\n", media)
+		medias = append(medias, media)
 	}
 
 	fmt.Println("Total watch time:", watchTime/60, "hours")
+	fmt.Println("Total episodes:", episodes)
+
+	// write medias to json file
+	data, _ := json.Marshal(medias)
+	os.WriteFile("medias.json", data, 0644)
 }
 
 type Response struct {
@@ -83,7 +91,7 @@ func queryAnime(id int) (media Media, err error) {
 	query := map[string]string{
 		"query": fmt.Sprintf(`
 			{
-				Media(idMal: %d) {
+				Media(idMal: %d, format_in: [ TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA ]) {
 					idMal,
 					episodes,
 					duration,
