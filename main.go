@@ -89,9 +89,11 @@ type Media struct {
 func queryAnime(id int) (media Media, err error) {
 	// Define the GraphQL query
 	query := map[string]string{
+		// format_in: [ TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA ]
+		// ignoring manga hides some anime
 		"query": fmt.Sprintf(`
 			{
-				Media(idMal: %d, format_in: [ TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA ]) {
+				Media(idMal: %d) {
 					idMal,
 					episodes,
 					duration,
