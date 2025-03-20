@@ -1,0 +1,226 @@
+[
+    {
+        "idMal": 4081,
+        "episodes": 13,
+        "duration": 24,
+        "format": "TV",
+        "title": {
+            "english": "Natsume's Book of Friends Season 1",
+            "romaji": "Natsume Yuujinchou"
+        },
+        "relations": {
+            "edges": [
+                {
+                    "relationType": "SEQUEL",
+                    "node": {
+                        "id": 5300
+                    }
+                },
+                {
+                    "relationType": "ADAPTATION",
+                    "node": {
+                        "id": 31859
+                    }
+                },
+                {
+                    "relationType": "OTHER",
+                    "node": {
+                        "id": 154978
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "idMal": 5300,
+        "episodes": 13,
+        "duration": 24,
+        "format": "TV",
+        "title": {
+            "english": "Natsume's Book of Friends Season 2",
+            "romaji": "Zoku Natsume Yuujinchou"
+        },
+        "relations": {
+            "edges": [
+                {
+                    "relationType": "PREQUEL",
+                    "node": {
+                        "id": 4081
+                    }
+                },
+                {
+                    "relationType": "SEQUEL",
+                    "node": {
+                        "id": 10379
+                    }
+                },
+                {
+                    "relationType": "ADAPTATION",
+                    "node": {
+                        "id": 31859
+                    }
+                },
+                {
+                    "relationType": "SIDE_STORY",
+                    "node": {
+                        "id": 19945
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "idMal": 31859,
+        "episodes": 12,
+        "duration": 24,
+        "format": "TV",
+        "title": {
+            "english": "Grimgar of Fantasy and Ash",
+            "romaji": "Hai to Gensou no Grimgar"
+        },
+        "relations": {
+            "edges": [
+                {
+                    "relationType": "ADAPTATION",
+                    "node": {
+                        "id": 86365
+                    }
+                },
+                {
+                    "relationType": "SIDE_STORY",
+                    "node": {
+                        "id": 21599
+                    }
+                },
+                {
+                    "relationType": "ALTERNATIVE",
+                    "node": {
+                        "id": 86367
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "idMal": 10379,
+        "episodes": 13,
+        "duration": 24,
+        "format": "TV",
+        "title": {
+            "english": "Natsume's Book of Friends Season 3",
+            "romaji": "Natsume Yuujinchou San"
+        },
+        "relations": {
+            "edges": [
+                {
+                    "relationType": "PREQUEL",
+                    "node": {
+                        "id": 5300
+                    }
+                },
+                {
+                    "relationType": "SEQUEL",
+                    "node": {
+                        "id": 11665
+                    }
+                },
+                {
+                    "relationType": "ADAPTATION",
+                    "node": {
+                        "id": 31859
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "idMal": 19945,
+        "episodes": 5,
+        "duration": 1,
+        "format": "SPECIAL",
+        "title": {
+            "english": "",
+            "romaji": "3D Nyanko-sensei Gekijou"
+        },
+        "relations": {
+            "edges": [
+                {
+                    "relationType": "PARENT",
+                    "node": {
+                        "id": 5300
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "idMal": 11665,
+        "episodes": 13,
+        "duration": 24,
+        "format": "TV",
+        "title": {
+            "english": "Natsume's Book of Friends Season 4",
+            "romaji": "Natsume Yuujinchou Shi"
+        },
+        "relations": {
+            "edges": [
+                {
+                    "relationType": "PREQUEL",
+                    "node": {
+                        "id": 10379
+                    }
+                },
+                {
+                    "relationType": "ADAPTATION",
+                    "node": {
+                        "id": 31859
+                    }
+                },
+                {
+                    "relationType": "SIDE_STORY",
+                    "node": {
+                        "id": 18849
+                    }
+                },
+                {
+                    "relationType": "SIDE_STORY",
+                    "node": {
+                        "id": 20478
+                    }
+                },
+                {
+                    "relationType": "SEQUEL",
+                    "node": {
+                        "id": 21710
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "idMal": 18849,
+        "episodes": 1,
+        "duration": 23,
+        "format": "SPECIAL",
+        "title": {
+            "english": "Natsume's Book of Friends: Nyanko-sensei \u0026 The First Errand",
+            "romaji": "Natsume Yuujinchou: Nyanko-sensei to Hajimete no Otsukai"
+        },
+        "relations": {
+            "edges": [
+                {
+                    "relationType": "PARENT",
+                    "node": {
+                        "id": 11665
+                    }
+                },
+                {
+                    "relationType": "PARENT",
+                    "node": {
+                        "id": 21710
+                    }
+                }
+            ]
+        }
+    }
+]
