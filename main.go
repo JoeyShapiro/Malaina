@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,11 +12,18 @@ import (
 )
 
 func main() {
+	fid := flag.Int("id", 0, "ID of the anime to start from")
+
+	flag.Parse()
+
+	if *fid == 0 {
+		fmt.Println("Please provide an ID")
+		os.Exit(1)
+	}
+
 	var medias []Media
-	queue := []int{4081}
+	queue := []int{*fid}
 	seen := []int{}
-	watchTime := 0
-	episodes := 0
 
 loop_queue:
 	for len(queue) > 0 {
@@ -39,23 +47,36 @@ loop_queue:
 			continue
 		}
 
-		watchTime += media.Duration * media.Episodes
-		episodes += media.Episodes
-
 		for _, related := range media.Relations.Edges {
 			queue = append(queue, related.Node.Id)
 		}
 
-		fmt.Printf("%+v\n", media)
 		medias = append(medias, media)
 	}
-
-	fmt.Println("Total watch time:", watchTime/60, "hours")
-	fmt.Println("Total episodes:", episodes)
 
 	// write medias to json file
 	data, _ := json.Marshal(medias)
 	os.WriteFile("medias.json", data, 0644)
+
+	watchTime := 0
+	episodes := 0
+	var links []Link
+
+	// do stuff with it separately
+	for _, media := range medias {
+		watchTime += media.Duration * media.Episodes
+		episodes += media.Episodes
+
+		for _, related := range media.Relations.Edges {
+			links = append(links, Link{
+				media.Id,
+				related.Node.Id,
+				related.RelationType})
+		}
+	}
+
+	fmt.Println("Total watch time:", watchTime/60, "hours")
+	fmt.Println("Total episodes:", episodes)
 }
 
 type Response struct {
@@ -84,6 +105,12 @@ type Media struct {
 			} `json:"node"`
 		} `json:"edges"`
 	} `json:"relations"`
+}
+
+type Link struct {
+	To       int
+	From     int
+	Relation string
 }
 
 func queryAnime(id int) (media Media, err error) {
