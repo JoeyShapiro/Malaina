@@ -57,6 +57,13 @@ func main() {
 		episodes += media.Episodes
 
 		for _, related := range media.Relations.Edges {
+			// TODO handle empty ones
+			if !Contains(medias, Media{Id: related.Node.Id}, func(a, b Media) bool {
+				return a.Id == b.Id
+			}) {
+				continue
+			}
+
 			links = append(links, Link{
 				media.Id,
 				related.Node.Id,
@@ -146,6 +153,7 @@ type Response struct {
 	} `json:"errors"`
 }
 
+// TODO more data
 type Media struct {
 	Id       int    `json:"idMal"`
 	Episodes int    `json:"episodes"`
@@ -163,6 +171,9 @@ type Media struct {
 			} `json:"node"`
 		} `json:"edges"`
 	} `json:"relations"`
+	CoverImage struct {
+		Medium string `json:"medium"`
+	} `json:"coverImage"`
 }
 
 type Link struct {
@@ -224,6 +235,15 @@ func queryAnime(id int) (media Media, err error) {
 	}
 
 	return res.Data.Media, nil
+}
+
+func Contains[T any](slice []T, value T, comp func(T, T) bool) bool {
+	for _, item := range slice {
+		if comp(item, value) {
+			return true
+		}
+	}
+	return false
 }
 
 /*

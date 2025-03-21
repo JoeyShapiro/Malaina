@@ -104,13 +104,17 @@
 {{ range .Medias }}
         { 
           id: {{ .Id }},
+        {{ if .Title.English }}
           name: "{{ .Title.English }}", 
+        {{ else }}
+          name: "{{ .Title.Romaji }}",
+        {{ end }}
           group: 1,
-          image: "/api/placeholder/60/60",
+          image: "{{ .CoverImage.Medium }}",
           stats: {
-            strength: 85,
-            speed: 70,
-            intelligence: 90
+            episodes: {{ .Episodes }},
+            duration: {{ .Duration }},
+            format: {{ .Format }}
           }
         },
 {{ end }}
@@ -231,27 +235,9 @@
         .attr("dy", "0.8em")
         .text(statName);
       
-      // Background bar
-      selection.append("rect")
-        .attr("x", 70)
-        .attr("y", yPosition)
-        .attr("width", 40)
-        .attr("height", 10)
-        .attr("fill", "#eee")
-        .attr("rx", 2);
-      
-      // Value bar
-      selection.append("rect")
-        .attr("x", 70)
-        .attr("y", yPosition)
-        .attr("width", statValue * 0.4)
-        .attr("height", 10)
-        .attr("fill", statColorScale(statValue))
-        .attr("rx", 2);
-      
       // Value text
       selection.append("text")
-        .attr("x", 115)
+        .attr("x", 100)
         .attr("y", yPosition)
         .attr("dy", "0.8em")
         .attr("text-anchor", "end")
@@ -262,9 +248,9 @@
     // Add stats for each node
     statsGroup.each(function(d) {
       const selection = d3.select(this);
-      addStatBar(selection, "STR", d.stats.strength, 0);
-      addStatBar(selection, "SPD", d.stats.speed, 15);
-      addStatBar(selection, "INT", d.stats.intelligence, 30);
+      addStatBar(selection, "Episodes", d.stats.episodes, 0);
+      addStatBar(selection, "Duration", d.stats.duration, 15);
+      addStatBar(selection, "Format", d.stats.format, 30);
     });
     
     // Variable to track if labels are visible
