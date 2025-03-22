@@ -124,16 +124,10 @@ func queryAnimes(aid int) (medias []Media, err error) {
 		progressbar.OptionSpinnerType(25),
 	)
 
-loop_queue:
 	for len(queue) > 0 {
 		id := queue[0]
 		queue = queue[1:]
 
-		for _, idSeen := range seen {
-			if id == idSeen {
-				continue loop_queue
-			}
-		}
 		seen = append(seen, id)
 
 		barQueue.Set(len(seen)) // safer
@@ -155,7 +149,7 @@ loop_queue:
 						BarStart:      "[",
 						BarEnd:        "]",
 					}))
-				for i := 0; i < 60; i++ {
+				for range 60 {
 					barTimeout.Add(1)
 					time.Sleep(1 * time.Second)
 				}
@@ -167,6 +161,14 @@ loop_queue:
 			if related.Node.Id == 0 {
 				continue
 			}
+
+			// dont even add known ones
+			if Contains(seen, related.Node.Id, func(a, b int) bool {
+				return a == b
+			}) {
+				continue
+			}
+
 			queue = append(queue, related.Node.Id)
 		}
 
