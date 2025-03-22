@@ -1,0 +1,4 @@
+github.com/hedzr/progressbar v1.2.5 h1:bFZRn8l24HMtjF9+zGh8UGAU25jRdQyNgRX+KAgf1qk=
+github.com/hedzr/progressbar v1.2.5/go.mod h1:JF3k3RCYR0X0nThFxsKqbPOezDmgufo99+v5TyrmKw0=
+golang.org/x/net v0.37.0 h1:1zLorHbz+LYj7MQlSf1+2tPIIgibq2eL5xkrGk6f+2c=
+golang.org/x/net v0.37.0/go.mod h1:ivrbrMbzFq5J41QOQh0siUuly180yBYtLp+CKbEaFx8=

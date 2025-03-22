@@ -8,21 +8,62 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"math/rand"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/hedzr/progressbar"
 )
 
 //go:embed template.html
 var templateFS embed.FS
 
 func main() {
-	fid := flag.Int("id", 0, "ID of the anime to start from")
+	fid := flag.Int("id", 0, "ID of the anime to start from (Anilist ID)")
 	fimport := flag.String("import", "", "Import a json file")
 	fexport := flag.String("export", "", "Export a json file")
 	fout := flag.String("o", "medias.html", "Output file")
 
 	flag.Parse()
+
+	tasks := progressbar.NewTasks(progressbar.New())
+	defer tasks.Close()
+
+	tasks.Add(
+		progressbar.WithTaskAddBarOptions(
+			progressbar.WithBarSpinner(25),
+			progressbar.WithBarUpperBound(100),
+			progressbar.WithBarWidth(16),
+			progressbar.WithBarTextSchema(`{{.Indent}}{{.Prepend}} {{.Bar}} {{.Percent}} | <b><font color="green">{{.Title}}</font></b> {{.Append}}`),
+		),
+		progressbar.WithTaskAddBarTitle("Task"),
+		progressbar.WithTaskAddOnTaskProgressing(func(bar progressbar.PB, exitCh <-chan struct{}) {
+			for ub, ix := bar.UpperBound(), int64(0); ix < ub; ix++ {
+				ms := time.Duration(20 + rand.Intn(500))
+				time.Sleep(time.Millisecond * ms)
+				bar.Step(1)
+			}
+		}),
+	)
+	tasks.Add(
+		progressbar.WithTaskAddBarOptions(
+			progressbar.WithBarStepper(0),
+			progressbar.WithBarUpperBound(100),
+			progressbar.WithBarWidth(32),
+			// progressbar.WithBarTextSchema(schema),
+		),
+		progressbar.WithTaskAddBarTitle("Task"), // fmt.Sprintf("Task %v", i)),
+		progressbar.WithTaskAddOnTaskProgressing(func(bar progressbar.PB, exitCh <-chan struct{}) {
+			for ub, ix := bar.UpperBound(), int64(0); ix < ub; ix++ {
+				ms := time.Duration(10 + rand.Intn(500)) //nolint:gosec //just a demo
+				time.Sleep(time.Millisecond * ms)
+				bar.Step(1)
+			}
+		}),
+	)
+
+	tasks.Wait()
 
 	if *fid == 0 && *fimport == "" {
 		fmt.Println("Please provide an ID or a json file")
