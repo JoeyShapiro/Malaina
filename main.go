@@ -49,15 +49,14 @@ func main() {
 	tasks.Add(
 		progressbar.WithTaskAddBarOptions(
 			progressbar.WithBarStepper(0),
-			progressbar.WithBarUpperBound(100),
+			progressbar.WithBarUpperBound(60),
 			progressbar.WithBarWidth(32),
-			// progressbar.WithBarTextSchema(schema),
+			progressbar.WithBarTextSchema(`{{.Indent}}{{.Prepend}} {{.Bar}} {{.Percent}} | <b><font color="yellow">{{.Title}}</font></b>`),
 		),
-		progressbar.WithTaskAddBarTitle("Task"), // fmt.Sprintf("Task %v", i)),
+		progressbar.WithTaskAddBarTitle("Waiting 60s"), // fmt.Sprintf("Task %v", i)),
 		progressbar.WithTaskAddOnTaskProgressing(func(bar progressbar.PB, exitCh <-chan struct{}) {
 			for ub, ix := bar.UpperBound(), int64(0); ix < ub; ix++ {
-				ms := time.Duration(10 + rand.Intn(500)) //nolint:gosec //just a demo
-				time.Sleep(time.Millisecond * ms)
+				time.Sleep(1 * time.Second)
 				bar.Step(1)
 			}
 		}),
