@@ -100,8 +100,8 @@ func main() {
 	}
 }
 
-func queryAnimes(id int) (medias []Media, err error) {
-	queue := []int{id}
+func queryAnimes(aid int) (medias []Media, err error) {
+	queue := []int{aid}
 	seen := []int{}
 
 loop_queue:
@@ -167,7 +167,7 @@ type Media struct {
 		Edges []struct {
 			RelationType string `json:"relationType"`
 			Node         struct {
-				Id int `json:"id"`
+				Id int `json:"idMal"`
 			} `json:"node"`
 		} `json:"edges"`
 	} `json:"relations"`
@@ -202,7 +202,7 @@ func queryAnime(id int) (media Media, err error) {
 						edges {
 							relationType,
 							node {
-								id
+								idMal
 							}
 						}
 					}
