@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-// go:embed template.html
+//go:embed template.html
 var templateFS embed.FS
 
 func main() {
@@ -93,7 +93,7 @@ func main() {
 	}
 
 	// Parse the template file
-	tmpl, err := template.ParseFS(templateFS, "*.tmpl")
+	tmpl, err := template.ParseFS(templateFS, "template.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		os.Exit(1)
@@ -105,7 +105,7 @@ func main() {
 		fmt.Println("Error creating output file:", err)
 		os.Exit(1)
 	}
-	err = tmpl.ExecuteTemplate(f, "mytemplate.tmpl", page)
+	err = tmpl.ExecuteTemplate(f, "template.html", page)
 	if err != nil {
 		fmt.Println("Error executing template:", err)
 		os.Exit(1)
