@@ -131,14 +131,13 @@ func queryAnimes(aid int) (medias []Media, err error) {
 		seen = append(seen, id)
 
 		barQueue.Set(len(seen)) // safer
-		barQueue.Describe(fmt.Sprintf("Querying: %d (%d / %d)", id, len(seen), len(queue)))
+		barQueue.Describe(fmt.Sprintf("Querying: %d (%d / %d)", id, len(seen), len(seen)+len(queue)))
 
 		media, err := queryAnime(id)
 		if err != nil {
 			fmt.Println(id, ":", err)
 			if err.Error() == "Too Many Requests." {
 				queue = append(queue, id)
-				fmt.Println()
 				barTimeout := progressbar.NewOptions(60,
 					progressbar.OptionSetDescription("Waiting for timeout"),
 					progressbar.OptionEnableColorCodes(true),
