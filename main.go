@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"html/template"
 	"io"
-	"math/rand"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/hedzr/progressbar"
+	"github.com/schollz/progressbar/v3"
 )
 
 //go:embed template.html
@@ -26,43 +26,6 @@ func main() {
 	fout := flag.String("o", "medias.html", "Output file")
 
 	flag.Parse()
-
-	tasks := progressbar.NewTasks(progressbar.New())
-	defer tasks.Close()
-
-	tasks.Add(
-		progressbar.WithTaskAddBarOptions(
-			progressbar.WithBarSpinner(25),
-			progressbar.WithBarUpperBound(100),
-			progressbar.WithBarWidth(16),
-			progressbar.WithBarTextSchema(`{{.Indent}}{{.Prepend}} {{.Bar}} {{.Percent}} | <b><font color="green">{{.Title}}</font></b> {{.Append}}`),
-		),
-		progressbar.WithTaskAddBarTitle("Task"),
-		progressbar.WithTaskAddOnTaskProgressing(func(bar progressbar.PB, exitCh <-chan struct{}) {
-			for ub, ix := bar.UpperBound(), int64(0); ix < ub; ix++ {
-				ms := time.Duration(20 + rand.Intn(500))
-				time.Sleep(time.Millisecond * ms)
-				bar.Step(1)
-			}
-		}),
-	)
-	tasks.Add(
-		progressbar.WithTaskAddBarOptions(
-			progressbar.WithBarStepper(0),
-			progressbar.WithBarUpperBound(60),
-			progressbar.WithBarWidth(32),
-			progressbar.WithBarTextSchema(`{{.Indent}}{{.Prepend}} {{.Bar}} {{.Percent}} | <b><font color="yellow">{{.Title}}</font></b>`),
-		),
-		progressbar.WithTaskAddBarTitle("Waiting 60s"), // fmt.Sprintf("Task %v", i)),
-		progressbar.WithTaskAddOnTaskProgressing(func(bar progressbar.PB, exitCh <-chan struct{}) {
-			for ub, ix := bar.UpperBound(), int64(0); ix < ub; ix++ {
-				time.Sleep(1 * time.Second)
-				bar.Step(1)
-			}
-		}),
-	)
-
-	tasks.Wait()
 
 	if *fid == 0 && *fimport == "" {
 		fmt.Println("Please provide an ID or a json file")
@@ -156,6 +119,11 @@ func queryAnimes(aid int) (medias []Media, err error) {
 	queue := []int{aid}
 	seen := []int{}
 
+	barQueue := progressbar.NewOptions(-1,
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionSpinnerType(25),
+	)
+
 loop_queue:
 	for len(queue) > 0 {
 		id := queue[0]
@@ -168,13 +136,29 @@ loop_queue:
 		}
 		seen = append(seen, id)
 
+		barQueue.Set(len(seen)) // safer
+		barQueue.Describe(fmt.Sprintf("Querying: %d (%d / %d)", id, len(seen), len(queue)))
+
 		media, err := queryAnime(id)
 		if err != nil {
 			fmt.Println(id, ":", err)
 			if err.Error() == "Too Many Requests." {
 				queue = append(queue, id)
-				// TODO give notice
-				time.Sleep(60 * time.Second)
+				fmt.Println()
+				barTimeout := progressbar.NewOptions(60,
+					progressbar.OptionSetDescription("Waiting for timeout"),
+					progressbar.OptionEnableColorCodes(true),
+					progressbar.OptionSetTheme(progressbar.Theme{
+						Saucer:        "[green]━[reset]",
+						SaucerHead:    "[green][reset]",
+						SaucerPadding: "[red]━[reset]",
+						BarStart:      "[",
+						BarEnd:        "]",
+					}))
+				for i := 0; i < 60; i++ {
+					barTimeout.Add(1)
+					time.Sleep(1 * time.Second)
+				}
 			}
 			continue
 		}
@@ -296,7 +280,7 @@ func queryAnime(id int) (media Media, err error) {
 	}
 
 	if len(res.Errors) > 0 {
-		return media, fmt.Errorf(res.Errors[0].Message)
+		return media, errors.New(res.Errors[0].Message)
 	}
 
 	return res.Data.Media, nil
