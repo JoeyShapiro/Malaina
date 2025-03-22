@@ -31,6 +31,10 @@ func main() {
 			fmt.Println("Error querying anime:", err)
 			os.Exit(1)
 		}
+
+		// write medias to json file
+		data, _ := json.Marshal(medias)
+		os.WriteFile("medias.json", data, 0644)
 	} else {
 		content, err := os.ReadFile(*fimport)
 		if err != nil {
@@ -121,16 +125,21 @@ loop_queue:
 			fmt.Println(id, ":", err)
 			if err.Error() == "Too Many Requests." {
 				queue = append(queue, id)
+				// TODO give notice
 				time.Sleep(60 * time.Second)
 			}
 			continue
 		}
 
 		for _, related := range media.Relations.Edges {
+			if related.Node.Id == 0 {
+				continue
+			}
 			queue = append(queue, related.Node.Id)
 		}
 
 		medias = append(medias, media)
+		time.Sleep(1 * time.Second)
 	}
 
 	return
@@ -155,7 +164,7 @@ type Response struct {
 
 // TODO more data
 type Media struct {
-	Id       int    `json:"idMal"`
+	Id       int    `json:"id"`
 	Episodes int    `json:"episodes"`
 	Duration int    `json:"duration"`
 	Format   string `json:"format"`
@@ -167,7 +176,7 @@ type Media struct {
 		Edges []struct {
 			RelationType string `json:"relationType"`
 			Node         struct {
-				Id int `json:"idMal"`
+				Id int `json:"id"`
 			} `json:"node"`
 		} `json:"edges"`
 	} `json:"relations"`
@@ -189,8 +198,8 @@ func queryAnime(id int) (media Media, err error) {
 		// ignoring manga hides some anime
 		"query": fmt.Sprintf(`
 			{
-				Media(idMal: %d) {
-					idMal,
+				Media(id: %d) {
+					id,
 					episodes,
 					duration,
 					format,
@@ -202,15 +211,23 @@ func queryAnime(id int) (media Media, err error) {
 						edges {
 							relationType,
 							node {
-								idMal
+								id
 							}
 						}
+					},
+					coverImage {
+						medium
 					}
 				}
 			}
 		`, id),
 	}
 	jsonValue, _ := json.Marshal(query)
+
+	// TODO mal id can be wrong (4081 -> 1859)
+	// maybe check the name is the same
+	// nah, the backend doesnt matter, and dont want user to confirm
+	// might be manga to anime adaptation
 
 	// Send the HTTP request
 	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
