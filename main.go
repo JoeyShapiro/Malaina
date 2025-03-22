@@ -128,8 +128,6 @@ func queryAnimes(aid int) (medias []Media, err error) {
 		id := queue[0]
 		queue = queue[1:]
 
-		seen = append(seen, id)
-
 		barQueue.Set(len(seen)) // safer
 		barQueue.Describe(fmt.Sprintf("Querying: %d (%d / %d)", id, len(seen), len(seen)+len(queue)))
 
@@ -167,10 +165,17 @@ func queryAnimes(aid int) (medias []Media, err error) {
 			}) {
 				continue
 			}
+			// also check if its in queue
+			if Contains(queue, related.Node.Id, func(a, b int) bool {
+				return a == b
+			}) {
+				continue
+			}
 
 			queue = append(queue, related.Node.Id)
 		}
 
+		seen = append(seen, id)
 		medias = append(medias, media)
 		time.Sleep(1 * time.Second)
 	}
