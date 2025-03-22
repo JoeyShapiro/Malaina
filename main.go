@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"embed"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -12,9 +13,14 @@ import (
 	"time"
 )
 
+// go:embed template.html
+var templateFS embed.FS
+
 func main() {
 	fid := flag.Int("id", 0, "ID of the anime to start from")
 	fimport := flag.String("import", "", "Import a json file")
+	fexport := flag.String("export", "", "Export a json file")
+	fout := flag.String("o", "medias.html", "Output file")
 
 	flag.Parse()
 
@@ -33,8 +39,10 @@ func main() {
 		}
 
 		// write medias to json file
-		data, _ := json.Marshal(medias)
-		os.WriteFile("medias.json", data, 0644)
+		if *fexport != "" {
+			data, _ := json.Marshal(medias)
+			os.WriteFile(*fexport, data, 0644)
+		}
 	} else {
 		content, err := os.ReadFile(*fimport)
 		if err != nil {
@@ -85,19 +93,19 @@ func main() {
 	}
 
 	// Parse the template file
-	tmpl, err := template.ParseFiles("template.html")
+	tmpl, err := template.ParseFS(templateFS, "*.tmpl")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		os.Exit(1)
 	}
 
 	// Execute the template with our data
-	f, err := os.Create("medias.html")
+	f, err := os.Create(*fout)
 	if err != nil {
 		fmt.Println("Error creating output file:", err)
 		os.Exit(1)
 	}
-	err = tmpl.Execute(f, page)
+	err = tmpl.ExecuteTemplate(f, "mytemplate.tmpl", page)
 	if err != nil {
 		fmt.Println("Error executing template:", err)
 		os.Exit(1)
