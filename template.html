@@ -24,8 +24,8 @@
     }
     
     .links line {
-      stroke: #999;
       stroke-opacity: 0.6;
+      transition: stroke-width 0.3s;
     }
     
     .node-card {
@@ -82,6 +82,41 @@
     button:hover {
       background-color: #45a049;
     }
+
+    .legend {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 5px;
+      margin-right: 5px;
+    }
+    
+    .tooltip {
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 1000;
+    }
+    
+    .highlighted {
+      stroke-width: 4px !important;
+    }
   </style>
 </head>
 <body>
@@ -94,6 +129,8 @@
     <h3>Total Episodes: {{ .Episodes }}</h3>
     <h3>Total Minutes: {{ .WatchTime }}</h3>
     <div id="graph"></div>
+    <div id="legend" class="legend"></div>
+    <div id="tooltip" class="tooltip"></div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
@@ -134,15 +171,32 @@
     const cardWidth = 120;
     const cardHeight = 150;
     const imageSize = 60;
+
+    const tooltip = d3.select("#tooltip");
+
+    // Define color scale for relationship types
+    const relationshipTypes = [...new Set(graphData.links.map(d => d.value))];
+    const colors = [
+      "#ff7f0e", // ADAPTATION - orange
+      "#2ca02c", // PREQUEL - green
+      "#d62728", // SEQUEL - red
+      "#9467bd", // SIDE_STORY - purple
+      "#8c564b", // PARENT - brown
+      "#e377c2", // OTHER - pink
+    ];
     
-    // Create SVG element
+    const colorScale = d3.scaleOrdinal()
+      .domain(relationshipTypes)
+      .range(colors);
+    
+    // Create SVG
     const svg = d3.select("#graph")
       .append("svg")
       .attr("width", width)
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height]);
     
-    // Add zoom functionality
+    // Add zoom behavior
     const zoom = d3.zoom()
       .scaleExtent([0.5, 3])
       .on("zoom", (event) => {
@@ -151,10 +205,24 @@
     
     svg.call(zoom);
     
-    // Create a group for all elements that will be zoomed
+    // Create main group for graph
     const g = svg.append("g");
     
-    // Initialize the force simulation
+    // Create legend
+    const legend = d3.select("#legend");
+    relationshipTypes.forEach(type => {
+      const legendItem = legend.append("div")
+        .attr("class", "legend-item");
+      
+      legendItem.append("div")
+        .attr("class", "legend-color")
+        .style("background-color", colorScale(type));
+      
+      legendItem.append("span")
+        .text(type);
+    });
+    
+    // Initialize force simulation
     const simulation = d3.forceSimulation(graphData.nodes)
       .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(300))
       .force("charge", d3.forceManyBody().strength(-1000))
@@ -163,18 +231,36 @@
       .force("y", d3.forceY())
       .force("collision", d3.forceCollide().radius(cardWidth));
     
-    // Create a group for links
+    // Create links
     const link = g.append("g")
       .attr("class", "links")
       .selectAll("line")
       .data(graphData.links)
       .enter().append("line")
-      .attr("stroke-width", d => Math.sqrt(d.value) * 3)
-      .attr("stroke", "#666")
-      .attr("stroke-opacity", 0.8)
-      .attr("stroke-dasharray", "5,5");
+      .attr("stroke-width", 3)
+      .attr("stroke", "#999")  // All links are gray by default
+      .attr("stroke-opacity", 0.6)
+      .attr("data-value", d => d.value)  // Store relationship value as data attribute
+      .attr("class", d => `link-${d.source.id}-${d.target.id}`)
+      .on("mouseover", function(event, d) {
+        // Show tooltip with relationship value
+        tooltip.style("opacity", 1)
+          .html(`${getNodeNameById(d.source.id)} → ${getNodeNameById(d.target.id)}<br>Relation: ${d.value}`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function() {
+        // Hide tooltip
+        tooltip.style("opacity", 0);
+      });
     
-    // Create a group for nodes
+    // Helper function to get node name by ID
+    function getNodeNameById(id) {
+      const node = graphData.nodes.find(n => n.id === id);
+      return node ? node.name : id;
+    }
+    
+    // Create nodes
     const node = g.append("g")
       .attr("class", "nodes")
       .selectAll("g")
@@ -183,9 +269,54 @@
       .call(d3.drag()
         .on("start", dragstarted)
         .on("drag", dragged)
-        .on("end", dragended));
+        .on("end", dragended))
+      .on("mouseover", function(event, d) {
+        // Highlight all connected links
+        highlightConnections(d.id, true);
+      })
+      .on("mouseout", function(event, d) {
+        // Remove highlight from all links
+        highlightConnections(d.id, false);
+      });
     
-    // Add card background
+    // Function to highlight connections
+    function highlightConnections(nodeId, highlight) {
+      // Find all links where this node is the source
+      const sourceLinks = graphData.links.filter(l => 
+        l.source.id === nodeId
+      );
+      
+      // Reset all links to default state first if highlighting
+      if (highlight) {
+        d3.selectAll(".links line")
+          .classed("highlighted", false)
+          .attr("stroke", "#999");
+      }
+      
+      // For each link where this node is the source
+      sourceLinks.forEach(l => {
+        const linkElement = d3.select(`.link-${l.source.id}-${l.target.id}`);
+        
+        if (highlight) {
+          // Highlight link with appropriate color
+          linkElement.classed("highlighted", true)
+            .attr("stroke", colorScale(l.value));
+          
+          // Show tooltip with relationship value
+          tooltip.style("opacity", 1)
+            .html(`${getNodeNameById(l.source.id)} → ${getNodeNameById(l.target.id)}<br>Relation: ${l.value}`)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        } else {
+          // Remove highlight
+          linkElement.classed("highlighted", false)
+            .attr("stroke", "#999");
+          tooltip.style("opacity", 0);
+        }
+      });
+    }
+    
+    // Create card background
     node.append("rect")
       .attr("class", "node-card")
       .attr("width", cardWidth)
@@ -193,7 +324,7 @@
       .attr("x", -cardWidth / 2)
       .attr("y", -cardHeight / 2);
     
-    // Add image background
+    // Create image background
     node.append("rect")
       .attr("class", "node-image-bg")
       .attr("width", imageSize + 10)
@@ -201,7 +332,7 @@
       .attr("x", -imageSize / 2 - 5)
       .attr("y", -cardHeight / 2 + 10);
     
-    // Add node image
+    // Add images
     node.append("image")
       .attr("xlink:href", d => d.image)
       .attr("width", imageSize)
@@ -209,33 +340,26 @@
       .attr("x", -imageSize / 2)
       .attr("y", -cardHeight / 2 + 15);
     
-    // Add node title
+    // Add titles
     node.append("text")
       .attr("class", "node-title")
       .attr("y", -cardHeight / 2 + imageSize + 30)
       .attr("x", 0)
       .text(d => d.name);
     
-    // Define a color scale for stats
-    const statColorScale = d3.scaleLinear()
-      .domain([50, 100])
-      .range(["#ff9999", "#33cc33"]);
-    
-    // Add stat bars
+    // Create stats group
     const statsGroup = node.append("g")
       .attr("class", "node-stats")
       .attr("transform", `translate(${-cardWidth/2 + 10}, ${-cardHeight/2 + imageSize + 40})`);
     
-    // Helper function to add a stat bar
+    // Function to add stat bars
     function addStatBar(selection, statName, statValue, yPosition) {
-      // Stat label
       selection.append("text")
         .attr("x", 0)
         .attr("y", yPosition)
         .attr("dy", "0.8em")
         .text(statName);
       
-      // Value text
       selection.append("text")
         .attr("x", 100)
         .attr("y", yPosition)
@@ -245,7 +369,7 @@
         .text(statValue);
     }
     
-    // Add stats for each node
+    // Add stats
     statsGroup.each(function(d) {
       const selection = d3.select(this);
       addStatBar(selection, "Episodes", d.stats.episodes, 0);
@@ -253,17 +377,16 @@
       addStatBar(selection, "Format", d.stats.format, 30);
     });
     
-    // Variable to track if labels are visible
+    // Toggle labels visibility
     let labelsVisible = true;
     
-    // Toggle labels button
     d3.select("#toggleLabels").on("click", function() {
       labelsVisible = !labelsVisible;
       d3.selectAll(".node-stats").style("opacity", labelsVisible ? 1 : 0);
       d3.selectAll(".node-title").style("opacity", labelsVisible ? 1 : 0);
     });
     
-    // Reset layout button
+    // Reset layout
     d3.select("#resetLayout").on("click", function() {
       svg.transition().duration(750).call(
         zoom.transform,
@@ -273,7 +396,7 @@
       simulation.alpha(1).restart();
     });
     
-    // Update positions on each tick of the simulation
+    // Update positions on simulation tick
     simulation.on("tick", () => {
       link
         .attr("x1", d => d.source.x)
@@ -284,7 +407,7 @@
       node.attr("transform", d => `translate(${d.x}, ${d.y})`);
     });
     
-    // Drag functions
+    // Dragging functions
     function dragstarted(event, d) {
       if (!event.active) simulation.alphaTarget(0.3).restart();
       d.fx = d.x;
