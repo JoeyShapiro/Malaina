@@ -277,6 +277,8 @@ func queryAnime(id int) (media Media, err error) {
 	// nah, the backend doesnt matter, and dont want user to confirm
 	// might be manga to anime adaptation
 
+	// TODO add score and link
+
 	// Send the HTTP request
 	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
 	request.Header.Set("Content-Type", "application/json")

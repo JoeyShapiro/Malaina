@@ -252,6 +252,7 @@
       .attr("class", d => `link-${d.source.id}-${d.target.id}`)
       .on("mouseover", function(event, d) {
         // Show tooltip with relationship value
+        // TODO maybe change this
         tooltip.style("opacity", 1)
           .html(`${getNodeNameById(d.source.id)} → ${getNodeNameById(d.target.id)}<br>Relation: ${d.value}`)
           .style("left", (event.pageX + 10) + "px")
