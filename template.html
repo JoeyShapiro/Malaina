@@ -14,6 +14,7 @@
       max-width: 1000px;
       margin: 0 auto;
       padding: 20px;
+      display: flex;
     }
     
     svg {
@@ -62,16 +63,22 @@
     
     h1 {
       color: #333;
-      margin-bottom: 20px;
+      padding-left: 1em;
+      padding-right: 1em;
+      padding-top: 2px;
+      margin: 0;
     }
     
     .controls {
-      margin-bottom: 20px;
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     
     button {
       padding: 8px 12px;
-      margin-right: 10px;
+      margin: 5px;
       background-color: #4CAF50;
       color: white;
       border: none;
@@ -86,8 +93,9 @@
     .legend {
       margin-top: 20px;
       display: flex;
+      flex-direction: column;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 5px;
     }
     
     .legend-item {
@@ -120,16 +128,16 @@
   </style>
 </head>
 <body>
+  <h1>{{ .Title }} Connections</h1>
   <div class="container">
-    <h1>{{ .Title }} Connections</h1>
+    <div id="graph"></div>
     <div class="controls">
+      <h3>Total Episodes: {{ .Episodes }}</h3>
+      <h3>Total Minutes: {{ .WatchTime }}</h3>
       <button id="resetLayout">Reset Layout</button>
       <button id="toggleLabels">Toggle Labels</button>
+      <div id="legend" class="legend"></div>
     </div>
-    <h3>Total Episodes: {{ .Episodes }}</h3>
-    <h3>Total Minutes: {{ .WatchTime }}</h3>
-    <div id="graph"></div>
-    <div id="legend" class="legend"></div>
     <div id="tooltip" class="tooltip"></div>
   </div>
 
