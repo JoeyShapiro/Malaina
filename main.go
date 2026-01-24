@@ -20,6 +20,12 @@ import (
 
 //go:embed template.html
 var templateFS embed.FS
+var relatedTypes = []string{
+	"SEQUEL", "PREQUEL",
+	"PARENT", "SIDE_STORY",
+	"ALTERNATIVE", "SPIN_OFF",
+	"SUMMARY",
+}
 
 func main() {
 	fid := flag.Int("id", 0, "ID of the anime to start from (Anilist ID)")
@@ -166,6 +172,12 @@ func queryAnimes(aid int) (medias []Media, err error) {
 
 		for _, related := range media.Relations.Edges {
 			if related.Node.Id == 0 {
+				continue
+			}
+
+			if !Contains(relatedTypes, related.RelationType, func(a, b string) bool {
+				return a == b
+			}) {
 				continue
 			}
 
