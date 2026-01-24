@@ -15,6 +15,7 @@ import (
 	"runtime"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/schollz/progressbar/v3"
 )
 
@@ -29,11 +30,21 @@ var relatedTypes = []string{
 
 func main() {
 	fid := flag.Int("id", 0, "ID of the anime to start from (Anilist ID)")
+	fsearch := flag.String("search", "", "Search for an anime by name (Anilist ID)")
 	fimport := flag.String("import", "", "Import a json file")
 	fexport := flag.String("export", "", "Export a json file")
 	fout := flag.String("o", "medias.html", "Output file")
 
 	flag.Parse()
+
+	var err error
+	if *fsearch != "" {
+		*fid, err = searchAnimeId(*fsearch)
+		if err != nil {
+			fmt.Println("Error searching anime:", err)
+			os.Exit(1)
+		}
+	}
 
 	if *fid == 0 && *fimport == "" {
 		fmt.Println("Please provide an ID or a json file")
@@ -41,7 +52,6 @@ func main() {
 	}
 
 	var medias []Media
-	var err error
 	if *fid != 0 {
 		medias, err = queryAnimes(*fid)
 		if err != nil {
@@ -222,6 +232,17 @@ type Response struct {
 	} `json:"errors"`
 }
 
+type ResponseSearch struct {
+	Data struct {
+		Page struct {
+			Media []Media `json:"media"`
+		} `json:"Page"`
+	} `json:"data"`
+	Errors []struct {
+		Message string `json:"message"`
+	} `json:"errors"`
+}
+
 // TODO more data
 type Media struct {
 	Id       int    `json:"id"`
@@ -338,6 +359,142 @@ func Contains[T any](slice []T, value T, comp func(T, T) bool) bool {
 		}
 	}
 	return false
+}
+
+func searchAnimeId(name string) (id int, err error) {
+	media, err := searchAnime(name)
+	if err != nil {
+		return id, errors.New("Error searching anime: " + err.Error())
+	}
+
+	var choices []Choice
+	for _, m := range media {
+		title := m.Title.English
+		if title == "" {
+			title = m.Title.Romaji
+		}
+		choices = append(choices, Choice{Id: m.Id, Title: title})
+	}
+
+	// search as a seperate call seems bad. they only ever need it for this
+	// a picker would be cool, but increase size a lot
+	// so a basic prompt is fine
+	// actually it doesnt, and its cool
+	p := tea.NewProgram(initialModel(choices))
+
+	finalModel, err := p.Run()
+	if err != nil {
+		return id, errors.New("Error running prompt: " + err.Error())
+	}
+
+	m := finalModel.(model)
+	if m.selected < 0 {
+		return id, errors.New("no anime selected")
+	}
+
+	return choices[m.selected].Id, nil
+}
+
+func searchAnime(name string) (media []Media, err error) {
+	query := map[string]string{
+		// format_in: [ TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA ]
+		// ignoring manga hides some anime
+		"query": fmt.Sprintf(`
+			{
+				Page {
+					media(search: "%s", type: ANIME) {
+						id
+						title {
+							english
+							romaji
+						}
+					}
+				}
+			}
+		`, name),
+	}
+	jsonValue, _ := json.Marshal(query)
+
+	// Send the HTTP request
+	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	// Parse the response
+	data, _ := io.ReadAll(response.Body)
+	var res ResponseSearch
+	if err := json.Unmarshal(data, &res); err != nil {
+		return media, err
+	}
+
+	if len(res.Errors) > 0 {
+		return media, errors.New(res.Errors[0].Message)
+	}
+
+	return res.Data.Page.Media, nil
+}
+
+type model struct {
+	choices  []Choice
+	cursor   int
+	selected int
+}
+
+type Choice struct {
+	Id    int
+	Title string
+}
+
+func initialModel(choices []Choice) model {
+	return model{
+		choices:  choices,
+		cursor:   0,
+		selected: -1,
+	}
+}
+
+func (m model) Init() tea.Cmd {
+	return nil
+}
+
+func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+		case "up", "k":
+			if m.cursor > 0 {
+				m.cursor--
+			}
+		case "down", "j":
+			if m.cursor < len(m.choices)-1 {
+				m.cursor++
+			}
+		case "enter":
+			m.selected = m.cursor
+			return m, tea.Quit
+		}
+	}
+	return m, nil
+}
+
+func (m model) View() string {
+	s := "Select an anime to start from:\n\n"
+	for i, choice := range m.choices {
+		cursor := " "
+		if m.cursor == i {
+			cursor = ">"
+		}
+		s += fmt.Sprintf("%s %s\n", cursor, choice.Title)
+	}
+	return s
 }
 
 /*
