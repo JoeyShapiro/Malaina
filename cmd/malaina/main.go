@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"embed"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -15,18 +14,11 @@ import (
 	"runtime"
 	"time"
 
+	"malaina/internal"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/schollz/progressbar/v3"
 )
-
-//go:embed internal/template.html
-var templateFS embed.FS
-var relatedTypes = []string{
-	"SEQUEL", "PREQUEL",
-	"PARENT", "SIDE_STORY",
-	"ALTERNATIVE", "SPIN_OFF",
-	"SUMMARY",
-}
 
 func main() {
 	fid := flag.Int("id", 0, "ID of the anime to start from (Anilist ID)")
@@ -114,7 +106,7 @@ func main() {
 	}
 
 	// Parse the template file
-	tmpl, err := template.ParseFS(templateFS, "template.html")
+	tmpl, err := template.ParseFS(internal.TemplateFS, "template.html")
 	if err != nil {
 		fmt.Println("Error parsing template:", err)
 		os.Exit(1)
@@ -185,7 +177,7 @@ func queryAnimes(aid int) (medias []Media, err error) {
 				continue
 			}
 
-			if !Contains(relatedTypes, related.RelationType, func(a, b string) bool {
+			if !Contains(internal.RelatedTypes, related.RelationType, func(a, b string) bool {
 				return a == b
 			}) {
 				continue
