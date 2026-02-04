@@ -19,7 +19,7 @@ import (
 	"github.com/schollz/progressbar/v3"
 )
 
-//go:embed template.html
+//go:embed internal/template.html
 var templateFS embed.FS
 var relatedTypes = []string{
 	"SEQUEL", "PREQUEL",
