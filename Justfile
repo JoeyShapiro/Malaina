@@ -1,2 +1,2 @@
 build:
-    go build -o malaina -trimpath -ldflags="-s -w"
+    go build -o out ./... -trimpath -ldflags="-s -w"
