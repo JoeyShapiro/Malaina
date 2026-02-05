@@ -106,7 +106,7 @@ type PageData struct {
 	WatchTime int
 }
 
-type Response struct {
+type ResponseAnime struct {
 	Data struct {
 		Media Media `json:"Media"`
 	} `json:"data"`
@@ -155,6 +155,30 @@ type Link struct {
 	Relation string
 }
 
+func queryAnilist(query map[string]string) (data []byte, err error) {
+	jsonValue, _ := json.Marshal(query)
+
+	// TODO mal id can be wrong (4081 -> 1859)
+	// maybe check the name is the same
+	// nah, the backend doesnt matter, and dont want user to confirm
+	// might be manga to anime adaptation
+
+	// TODO add score and link
+
+	// Send the HTTP request
+	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	return io.ReadAll(response.Body)
+}
+
 func queryAnime(id int) (media Media, err error) {
 	// Define the GraphQL query
 	query := map[string]string{
@@ -186,29 +210,14 @@ func queryAnime(id int) (media Media, err error) {
 			}
 		`, id),
 	}
-	jsonValue, _ := json.Marshal(query)
 
-	// TODO mal id can be wrong (4081 -> 1859)
-	// maybe check the name is the same
-	// nah, the backend doesnt matter, and dont want user to confirm
-	// might be manga to anime adaptation
-
-	// TODO add score and link
-
-	// Send the HTTP request
-	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
+	data, err := queryAnilist(query)
 	if err != nil {
-		return
+		return media, err
 	}
-	defer response.Body.Close()
 
 	// Parse the response
-	data, _ := io.ReadAll(response.Body)
-	var res Response
+	var res ResponseAnime
 	if err := json.Unmarshal(data, &res); err != nil {
 		return media, err
 	}
@@ -220,41 +229,7 @@ func queryAnime(id int) (media Media, err error) {
 	return res.Data.Media, nil
 }
 
-func searchAnimeId(name string) (id int, err error) {
-	media, err := searchAnime(name)
-	if err != nil {
-		return id, errors.New("Error searching anime: " + err.Error())
-	}
-
-	var choices []Choice
-	for _, m := range media {
-		title := m.Title.English
-		if title == "" {
-			title = m.Title.Romaji
-		}
-		choices = append(choices, Choice{Id: m.Id, Title: title})
-	}
-
-	// search as a seperate call seems bad. they only ever need it for this
-	// a picker would be cool, but increase size a lot
-	// so a basic prompt is fine
-	// actually it doesnt, and its cool
-	p := tea.NewProgram(initialModel(choices))
-
-	finalModel, err := p.Run()
-	if err != nil {
-		return id, errors.New("Error running prompt: " + err.Error())
-	}
-
-	m := finalModel.(model)
-	if m.selected < 0 {
-		return id, errors.New("no anime selected")
-	}
-
-	return choices[m.selected].Id, nil
-}
-
-func searchAnime(name string) (media []Media, err error) {
+func SearchAnime(name string) (media []Media, err error) {
 	query := map[string]string{
 		// format_in: [ TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA ]
 		// ignoring manga hides some anime
@@ -272,21 +247,13 @@ func searchAnime(name string) (media []Media, err error) {
 			}
 		`, name),
 	}
-	jsonValue, _ := json.Marshal(query)
 
-	// Send the HTTP request
-	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
-	request.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	response, err := client.Do(request)
+	data, err := queryAnilist(query)
 	if err != nil {
-		return
+		return media, err
 	}
-	defer response.Body.Close()
 
 	// Parse the response
-	data, _ := io.ReadAll(response.Body)
 	var res ResponseSearch
 	if err := json.Unmarshal(data, &res); err != nil {
 		return media, err
