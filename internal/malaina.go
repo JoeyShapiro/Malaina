@@ -2,7 +2,18 @@ package internal
 
 // TODO is this internal or nothing or another folder called malaina
 
-import "embed"
+import (
+	"bytes"
+	"embed"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/schollz/progressbar/v3"
+)
 
 //go:embed template.html
 var TemplateFS embed.FS
@@ -11,4 +22,279 @@ var RelatedTypes = []string{
 	"PARENT", "SIDE_STORY",
 	"ALTERNATIVE", "SPIN_OFF",
 	"SUMMARY",
+}
+
+func queryAnimes(aid int) (medias []Media, err error) {
+	queue := []int{aid}
+	seen := []int{}
+
+	barQueue := progressbar.NewOptions(-1,
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionSpinnerType(25),
+	)
+
+	for len(queue) > 0 {
+		id := queue[0]
+		queue = queue[1:]
+
+		barQueue.Set(len(seen)) // safer
+		barQueue.Describe(fmt.Sprintf("Querying: %d (%d / %d)", id, len(seen), len(seen)+len(queue)))
+
+		media, err := queryAnime(id)
+		if err != nil {
+			fmt.Println(id, ":", err)
+			if err.Error() == "Too Many Requests." {
+				queue = append(queue, id)
+				barTimeout := progressbar.NewOptions(60,
+					progressbar.OptionSetDescription("Waiting for timeout"),
+					progressbar.OptionEnableColorCodes(true),
+					progressbar.OptionSetTheme(progressbar.Theme{
+						Saucer:        "[green]━[reset]",
+						SaucerHead:    "[green][reset]",
+						SaucerPadding: "[red]━[reset]",
+						BarStart:      "[",
+						BarEnd:        "]",
+					}))
+				for range 60 {
+					barTimeout.Add(1)
+					time.Sleep(1 * time.Second)
+				}
+			}
+			continue
+		}
+
+		for _, related := range media.Relations.Edges {
+			if related.Node.Id == 0 {
+				continue
+			}
+
+			if !Contains(RelatedTypes, related.RelationType, func(a, b string) bool {
+				return a == b
+			}) {
+				continue
+			}
+
+			// dont even add known ones
+			if Contains(seen, related.Node.Id, func(a, b int) bool {
+				return a == b
+			}) {
+				continue
+			}
+			// also check if its in queue
+			if Contains(queue, related.Node.Id, func(a, b int) bool {
+				return a == b
+			}) {
+				continue
+			}
+
+			queue = append(queue, related.Node.Id)
+		}
+
+		seen = append(seen, id)
+		medias = append(medias, media)
+		time.Sleep(1 * time.Second)
+	}
+
+	return
+}
+
+type PageData struct {
+	Title     string
+	Medias    []Media
+	Links     []Link
+	Episodes  int
+	WatchTime int
+}
+
+type Response struct {
+	Data struct {
+		Media Media `json:"Media"`
+	} `json:"data"`
+	Errors []struct {
+		Message string `json:"message"`
+	} `json:"errors"`
+}
+
+type ResponseSearch struct {
+	Data struct {
+		Page struct {
+			Media []Media `json:"media"`
+		} `json:"Page"`
+	} `json:"data"`
+	Errors []struct {
+		Message string `json:"message"`
+	} `json:"errors"`
+}
+
+// TODO more data
+type Media struct {
+	Id       int    `json:"id"`
+	Episodes int    `json:"episodes"`
+	Duration int    `json:"duration"`
+	Format   string `json:"format"`
+	Title    struct {
+		English string `json:"english"`
+		Romaji  string `json:"romaji"`
+	} `json:"title"`
+	Relations struct {
+		Edges []struct {
+			RelationType string `json:"relationType"`
+			Node         struct {
+				Id int `json:"id"`
+			} `json:"node"`
+		} `json:"edges"`
+	} `json:"relations"`
+	CoverImage struct {
+		Medium string `json:"medium"`
+	} `json:"coverImage"`
+}
+
+type Link struct {
+	To       int
+	From     int
+	Relation string
+}
+
+func queryAnime(id int) (media Media, err error) {
+	// Define the GraphQL query
+	query := map[string]string{
+		// format_in: [ TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA ]
+		// ignoring manga hides some anime
+		"query": fmt.Sprintf(`
+			{
+				Media(id: %d) {
+					id,
+					episodes,
+					duration,
+					format,
+					title {
+						english,
+						romaji
+					},
+					relations {
+						edges {
+							relationType,
+							node {
+								id
+							}
+						}
+					},
+					coverImage {
+						medium
+					}
+				}
+			}
+		`, id),
+	}
+	jsonValue, _ := json.Marshal(query)
+
+	// TODO mal id can be wrong (4081 -> 1859)
+	// maybe check the name is the same
+	// nah, the backend doesnt matter, and dont want user to confirm
+	// might be manga to anime adaptation
+
+	// TODO add score and link
+
+	// Send the HTTP request
+	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	// Parse the response
+	data, _ := io.ReadAll(response.Body)
+	var res Response
+	if err := json.Unmarshal(data, &res); err != nil {
+		return media, err
+	}
+
+	if len(res.Errors) > 0 {
+		return media, errors.New(res.Errors[0].Message)
+	}
+
+	return res.Data.Media, nil
+}
+
+func searchAnimeId(name string) (id int, err error) {
+	media, err := searchAnime(name)
+	if err != nil {
+		return id, errors.New("Error searching anime: " + err.Error())
+	}
+
+	var choices []Choice
+	for _, m := range media {
+		title := m.Title.English
+		if title == "" {
+			title = m.Title.Romaji
+		}
+		choices = append(choices, Choice{Id: m.Id, Title: title})
+	}
+
+	// search as a seperate call seems bad. they only ever need it for this
+	// a picker would be cool, but increase size a lot
+	// so a basic prompt is fine
+	// actually it doesnt, and its cool
+	p := tea.NewProgram(initialModel(choices))
+
+	finalModel, err := p.Run()
+	if err != nil {
+		return id, errors.New("Error running prompt: " + err.Error())
+	}
+
+	m := finalModel.(model)
+	if m.selected < 0 {
+		return id, errors.New("no anime selected")
+	}
+
+	return choices[m.selected].Id, nil
+}
+
+func searchAnime(name string) (media []Media, err error) {
+	query := map[string]string{
+		// format_in: [ TV, TV_SHORT, MOVIE, SPECIAL, OVA, ONA ]
+		// ignoring manga hides some anime
+		"query": fmt.Sprintf(`
+			{
+				Page {
+					media(search: "%s", type: ANIME) {
+						id
+						title {
+							english
+							romaji
+						}
+					}
+				}
+			}
+		`, name),
+	}
+	jsonValue, _ := json.Marshal(query)
+
+	// Send the HTTP request
+	request, _ := http.NewRequest("POST", "https://graphql.anilist.co", bytes.NewBuffer(jsonValue))
+	request.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		return
+	}
+	defer response.Body.Close()
+
+	// Parse the response
+	data, _ := io.ReadAll(response.Body)
+	var res ResponseSearch
+	if err := json.Unmarshal(data, &res); err != nil {
+		return media, err
+	}
+
+	if len(res.Errors) > 0 {
+		return media, errors.New(res.Errors[0].Message)
+	}
+
+	return res.Data.Page.Media, nil
 }
