@@ -8,8 +8,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/schollz/progressbar/v3"
@@ -22,6 +24,81 @@ var RelatedTypes = []string{
 	"PARENT", "SIDE_STORY",
 	"ALTERNATIVE", "SPIN_OFF",
 	"SUMMARY",
+}
+
+func CreateGraph(wr io.Writer, anime int, fexport string, fimport string) (err error) {
+	var medias []Media
+	if anime != 0 {
+		medias, err = queryAnimes(anime)
+		if err != nil {
+			return errors.New("error querying anime: " + err.Error())
+		}
+
+		// write medias to json file
+		if fexport != "" {
+			data, _ := json.Marshal(medias)
+			os.WriteFile(fexport, data, 0644)
+		}
+	} else {
+		content, err := os.ReadFile(fimport)
+		if err != nil {
+			return errors.New("error reading file: " + err.Error())
+		}
+		if err := json.Unmarshal(content, &medias); err != nil {
+			return errors.New("error parsing json: " + err.Error())
+		}
+	}
+
+	// // write medias to json file
+	// data, _ := json.Marshal(medias)
+	// os.WriteFile("medias.json", data, 0644)
+
+	watchTime := 0
+	episodes := 0
+	var links []Link
+
+	// do stuff with it separately
+	for _, media := range medias {
+		watchTime += media.Duration * media.Episodes
+		episodes += media.Episodes
+
+		for _, related := range media.Relations.Edges {
+			// TODO handle empty ones
+			if !Contains(medias, Media{Id: related.Node.Id}, func(a, b Media) bool {
+				return a.Id == b.Id
+			}) {
+				continue
+			}
+
+			links = append(links, Link{
+				media.Id,
+				related.Node.Id,
+				related.RelationType})
+		}
+	}
+
+	// Create some data to pass to the template
+	page := PageData{
+		Title:     medias[0].Title.English,
+		Medias:    medias,
+		Links:     links,
+		Episodes:  episodes,
+		WatchTime: watchTime,
+	}
+
+	// Parse the template file
+	tmpl, err := template.ParseFS(TemplateFS, "template.html")
+	if err != nil {
+		return errors.New("error parsing template: " + err.Error())
+	}
+
+	// Execute the template with our data
+	err = tmpl.ExecuteTemplate(wr, "template.html", page)
+	if err != nil {
+		return errors.New("error executing template: " + err.Error())
+	}
+
+	return nil
 }
 
 func queryAnimes(aid int) (medias []Media, err error) {

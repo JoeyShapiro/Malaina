@@ -3,10 +3,9 @@
 package main
 
 import (
-	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
-	"html/template"
 	"os"
 	"os/exec"
 	"runtime"
@@ -39,85 +38,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	var medias []Media
-	if *fid != 0 {
-		medias, err = queryAnimes(*fid)
-		if err != nil {
-			fmt.Println("Error querying anime:", err)
-			os.Exit(1)
-		}
-
-		// write medias to json file
-		if *fexport != "" {
-			data, _ := json.Marshal(medias)
-			os.WriteFile(*fexport, data, 0644)
-		}
-	} else {
-		content, err := os.ReadFile(*fimport)
-		if err != nil {
-			fmt.Println("Error reading file:", err)
-			os.Exit(1)
-		}
-		if err := json.Unmarshal(content, &medias); err != nil {
-			fmt.Println("Error parsing json:", err)
-			os.Exit(1)
-		}
-	}
-
-	// // write medias to json file
-	// data, _ := json.Marshal(medias)
-	// os.WriteFile("medias.json", data, 0644)
-
-	watchTime := 0
-	episodes := 0
-	var links []Link
-
-	// do stuff with it separately
-	for _, media := range medias {
-		watchTime += media.Duration * media.Episodes
-		episodes += media.Episodes
-
-		for _, related := range media.Relations.Edges {
-			// TODO handle empty ones
-			if !Contains(medias, Media{Id: related.Node.Id}, func(a, b Media) bool {
-				return a.Id == b.Id
-			}) {
-				continue
-			}
-
-			links = append(links, Link{
-				media.Id,
-				related.Node.Id,
-				related.RelationType})
-		}
-	}
-
-	// Create some data to pass to the template
-	page := PageData{
-		Title:     medias[0].Title.English,
-		Medias:    medias,
-		Links:     links,
-		Episodes:  episodes,
-		WatchTime: watchTime,
-	}
-
-	// Parse the template file
-	tmpl, err := template.ParseFS(internal.TemplateFS, "template.html")
-	if err != nil {
-		fmt.Println("Error parsing template:", err)
-		os.Exit(1)
-	}
-
-	// Execute the template with our data
 	f, err := os.Create(*fout)
 	if err != nil {
 		fmt.Println("Error creating output file:", err)
 		os.Exit(1)
 	}
 	defer f.Close()
-	err = tmpl.ExecuteTemplate(f, "template.html", page)
+
+	err = internal.CreateGraph(f, *fid, *fexport, *fimport)
 	if err != nil {
-		fmt.Println("Error executing template:", err)
+		fmt.Println("Error creating graph:", err)
 		os.Exit(1)
 	}
 
@@ -142,6 +72,40 @@ func openBrowser(url string) error {
 	}
 
 	return cmd.Start()
+}
+
+func searchAnimeId(name string) (id int, err error) {
+	media, err := internal.SearchAnime(name)
+	if err != nil {
+		return id, errors.New("Error searching anime: " + err.Error())
+	}
+
+	var choices []Choice
+	for _, m := range media {
+		title := m.Title.English
+		if title == "" {
+			title = m.Title.Romaji
+		}
+		choices = append(choices, Choice{Id: m.Id, Title: title})
+	}
+
+	// search as a seperate call seems bad. they only ever need it for this
+	// a picker would be cool, but increase size a lot
+	// so a basic prompt is fine
+	// actually it doesnt, and its cool
+	p := tea.NewProgram(initialModel(choices))
+
+	finalModel, err := p.Run()
+	if err != nil {
+		return id, errors.New("Error running prompt: " + err.Error())
+	}
+
+	m := finalModel.(model)
+	if m.selected < 0 {
+		return id, errors.New("no anime selected")
+	}
+
+	return choices[m.selected].Id, nil
 }
 
 type model struct {
