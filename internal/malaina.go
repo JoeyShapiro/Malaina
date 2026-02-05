@@ -1,5 +1,7 @@
 package internal
 
+// TODO is this internal or nothing or another folder called malaina
+
 import "embed"
 
 //go:embed template.html
