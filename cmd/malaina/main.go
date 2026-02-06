@@ -13,6 +13,7 @@ import (
 	"malaina/internal"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/schollz/progressbar/v3"
 )
 
 func main() {
@@ -45,7 +46,37 @@ func main() {
 	}
 	defer f.Close()
 
-	err = internal.CreateGraph(f, *fid, *fexport, *fimport)
+	barQueue := progressbar.NewOptions(-1,
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionSpinnerType(25),
+	)
+
+	barTimeout := progressbar.NewOptions(60,
+		progressbar.OptionSetDescription("Waiting for timeout"),
+		progressbar.OptionEnableColorCodes(true),
+		progressbar.OptionSetTheme(progressbar.Theme{
+			Saucer:        "[green]━[reset]",
+			SaucerHead:    "[green][reset]",
+			SaucerPadding: "[red]━[reset]",
+			BarStart:      "[",
+			BarEnd:        "]",
+		}))
+	barTimeout.Clear()
+
+	err = internal.CreateGraph(f, *fid, *fexport, *fimport, func(id, seen, queue int, err error) {
+		if err != nil {
+			if err.Error() == "Too Many Requests." {
+				barTimeout.Reset()
+			}
+
+			if err.Error() == "Waiting for timeout" {
+				barTimeout.Add(1)
+			}
+		} else {
+			barQueue.Set(seen) // safer
+			barQueue.Describe(fmt.Sprintf("Querying: %d (%d / %d)", id, seen, seen+queue))
+		}
+	})
 	if err != nil {
 		fmt.Println("Error creating graph:", err)
 		os.Exit(1)

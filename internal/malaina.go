@@ -13,8 +13,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/schollz/progressbar/v3"
 )
 
 //go:embed template.html
@@ -26,10 +24,12 @@ var RelatedTypes = []string{
 	"SUMMARY",
 }
 
-func CreateGraph(wr io.Writer, anime int, fexport string, fimport string) (err error) {
+// TODO maybe move to malaina package
+// TODO add progress callback
+func CreateGraph(wr io.Writer, anime int, fexport string, fimport string, progress func(id int, seen int, queue int, err error)) (err error) {
 	var medias []Media
 	if anime != 0 {
-		medias, err = queryAnimes(anime)
+		medias, err = queryAnimes(anime, progress)
 		if err != nil {
 			return errors.New("error querying anime: " + err.Error())
 		}
@@ -101,39 +101,31 @@ func CreateGraph(wr io.Writer, anime int, fexport string, fimport string) (err e
 	return nil
 }
 
-func queryAnimes(aid int) (medias []Media, err error) {
+func queryAnimes(aid int, progress func(id int, seen int, queue int, err error)) (medias []Media, err error) {
 	queue := []int{aid}
 	seen := []int{}
-
-	barQueue := progressbar.NewOptions(-1,
-		progressbar.OptionEnableColorCodes(true),
-		progressbar.OptionSpinnerType(25),
-	)
 
 	for len(queue) > 0 {
 		id := queue[0]
 		queue = queue[1:]
 
-		barQueue.Set(len(seen)) // safer
-		barQueue.Describe(fmt.Sprintf("Querying: %d (%d / %d)", id, len(seen), len(seen)+len(queue)))
+		if progress != nil {
+			progress(id, len(seen), len(queue), nil)
+		}
 
 		media, err := queryAnime(id)
 		if err != nil {
 			fmt.Println(id, ":", err)
+			if progress != nil {
+				progress(id, len(seen), len(queue), err)
+			}
 			if err.Error() == "Too Many Requests." {
 				queue = append(queue, id)
-				barTimeout := progressbar.NewOptions(60,
-					progressbar.OptionSetDescription("Waiting for timeout"),
-					progressbar.OptionEnableColorCodes(true),
-					progressbar.OptionSetTheme(progressbar.Theme{
-						Saucer:        "[green]━[reset]",
-						SaucerHead:    "[green][reset]",
-						SaucerPadding: "[red]━[reset]",
-						BarStart:      "[",
-						BarEnd:        "]",
-					}))
+
 				for range 60 {
-					barTimeout.Add(1)
+					if progress != nil {
+						progress(id, len(seen), len(queue), errors.New("Waiting for timeout"))
+					}
 					time.Sleep(1 * time.Second)
 				}
 			}
@@ -232,6 +224,7 @@ type Link struct {
 	Relation string
 }
 
+// TODO also convert to response and handle errors
 func queryAnilist(query map[string]string) (data []byte, err error) {
 	jsonValue, _ := json.Marshal(query)
 
