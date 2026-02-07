@@ -2,6 +2,172 @@
 <html>
 <head>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #0f172a;
+            --panel: #111827;
+            --card: #0b1220;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --primary: #6366f1;
+            --primary-2: #4f46e5;
+            --accent: #22d3ee;
+            --border: #1f2937;
+            --shadow: 0 20px 45px rgba(2, 6, 23, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Inter", system-ui, -apple-system, sans-serif;
+            background: radial-gradient(1200px 600px at 10% -10%, #1f2937, transparent),
+                radial-gradient(1200px 600px at 110% 10%, #1e1b4b, transparent),
+                var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px;
+        }
+
+        .app {
+            width: min(980px, 100%);
+            background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(2, 6, 23, 0.9));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 36px;
+            box-shadow: var(--shadow);
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            letter-spacing: -0.02em;
+        }
+
+        header p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        input {
+            appearance: none;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: var(--text);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-weight: 600;
+            font-size: 0.98rem;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 10px 30px rgba(79, 70, 229, 0.35);
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 32px rgba(79, 70, 229, 0.45);
+        }
+
+        .secondary {
+            background: #111827;
+            color: var(--text);
+            border: 1px solid var(--border);
+            box-shadow: none;
+        }
+
+        .progress-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #111827;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar span {
+            display: block;
+            height: 100%;
+            width: 45%;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            border-radius: inherit;
+        }
+
+        .helper {
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
+    </style>
     <script src="wasm_exec.js"></script>
     <script>
         const go = new Go();
@@ -28,9 +194,40 @@
     </script>
 </head>
 <body>
-    <h1>Malaina WASM</h1>
+    <main class="app">
+        <header>
+            <h1>Malaina</h1>
+            <p>Generate anime relationship graphs with a cleaner, modern interface.</p>
+        </header>
 
-    <input type="number" name="aid" id="aid" placeholder="Anime ID"/>
-    <button onclick="Malaina()">Create Graph</button>
+        <section class="content">
+            <div class="card">
+                <div class="field">
+                    <label for="name">Anime Name</label>
+                    <input type="search" name="name" id="name" placeholder="e.g. Fullmetal Alchemist"/>
+                </div>
+
+                <div class="field">
+                    <label for="aid">Anime ID</label>
+                    <input type="number" name="aid" id="aid" placeholder="e.g. 5114"/>
+                </div>
+
+                <div class="actions">
+                    <button onclick="Malaina()">Create Graph</button>
+                    <button class="secondary" type="button">Preview</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Progress</h3>
+                <div class="progress-wrapper">
+                    <div class="progress-bar" aria-label="Sample progress bar">
+                        <span></span>
+                    </div>
+                    <div class="helper">Sample placeholder (45%) — connect this to your data later.</div>
+                </div>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
