@@ -4,6 +4,6 @@ build:
     cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" web
 
 web:
-    pushd web
+    cd web
     python -m http.server
-    popd
+    cd ..

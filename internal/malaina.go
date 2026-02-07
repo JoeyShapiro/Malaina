@@ -25,7 +25,6 @@ var RelatedTypes = []string{
 }
 
 // TODO maybe move to malaina package
-// TODO add progress callback
 func CreateGraph(wr io.Writer, anime int, fexport string, fimport string, progress func(id int, seen int, queue int, err error)) (err error) {
 	var medias []Media
 	if anime != 0 {
