@@ -180,6 +180,55 @@
             font-size: 0.88rem;
             color: var(--muted);
         }
+
+        .results {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .results-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 220px;
+            overflow: auto;
+            padding-right: 4px;
+        }
+
+        .result-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #0f172a;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: border 0.2s ease, transform 0.2s ease;
+        }
+
+        .result-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+
+        .result-title {
+            font-size: 0.92rem;
+            color: var(--text);
+        }
+
+        .result-id {
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
     </style>
     <script src="wasm_exec.js"></script>
     <script>
@@ -225,6 +274,8 @@
 
         async function handleSearch() {
             const name = document.getElementById('name').value;
+            const resultsList = document.getElementById('results-list');
+            const barHelper = document.getElementById('progress-helper');
             if (!name) {
                 // make the name input shake to indicate error
                 const input = document.getElementById('name');
@@ -238,8 +289,33 @@
                 return;
             }
 
+            barHelper.textContent = 'Searching...';
+            resultsList.innerHTML = '';
+
             const results = await window.MalainaSearch(name);
-            console.log(results);
+            const entries = results && typeof results === 'object' ? Object.entries(results) : [];
+            if (entries.length === 0) {
+                barHelper.textContent = 'No results found.';
+                return;
+            }
+
+            barHelper.textContent = `Found ${entries.length} result${entries.length === 1 ? '' : 's'}. Click to fill the ID.`;
+            entries.forEach(([id, title]) => {
+                const numericId = Number(id);
+                const row = document.createElement('button');
+                row.type = 'button';
+                row.className = 'result-item';
+                row.innerHTML = `
+                    <span class="result-title">${title}</span>
+                    <span class="result-id">ID: ${numericId}</span>
+                `;
+                row.addEventListener('click', () => {
+                    document.getElementById('aid').value = numericId;
+                    barHelper.textContent = `Selected ID ${numericId}.`; 
+                });
+
+                resultsList.appendChild(row);
+            });
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -288,6 +364,10 @@
                         <span></span>
                     </div>
                     <div class="helper" id="progress-helper"></div>
+                    <div class="results">
+                        <div class="results-title">Search Results</div>
+                        <div class="results-list" id="results-list"></div>
+                    </div>
                 </div>
             </div>
         </section>
