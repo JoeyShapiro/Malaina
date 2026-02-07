@@ -40,7 +40,7 @@ func main() {
 				if err != nil {
 					reject.Invoke(js.ValueOf(err.Error()))
 				} else {
-					resolve.Invoke(js.ValueOf(0))
+					resolve.Invoke(js.ValueOf(wr.String()))
 				}
 
 				js.Global().Get("console").Call("log", "Graph created successfully")

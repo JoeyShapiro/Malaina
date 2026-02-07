@@ -9,11 +9,28 @@
             .then((result) => {
                 go.run(result.instance);
             });
+
+        async function Malaina() {
+            const value = document.getElementById('aid').value;
+            
+            const aid = parseInt(value);
+            if (aid === 0) {
+                alert("Please enter a valid Anime ID");
+                return;
+            }
+
+            let body = await CreateGraph(aid);
+            const newTab = window.open('about:blank', '_blank');
+            newTab.document.write(body);
+            newTab.document.close();
+            newTab.focus();
+        }
     </script>
 </head>
 <body>
     <h1>Malaina WASM</h1>
 
-    <button onclick="CreateGraph(113415)">Create Graph</button>
+    <input type="number" name="aid" id="aid" placeholder="Anime ID"/>
+    <button onclick="Malaina()">Create Graph</button>
 </body>
 </html>
