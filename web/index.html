@@ -110,6 +110,19 @@
             box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
         }
 
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
         .actions {
             display: flex;
             gap: 12px;
@@ -209,13 +222,46 @@
             newTab.document.close();
             newTab.focus();
         }
+
+        async function handleSearch() {
+            const name = document.getElementById('name').value;
+            if (!name) {
+                // make the name input shake to indicate error
+                const input = document.getElementById('name');
+                input.classList.remove('shake');
+                void input.offsetWidth;
+                input.classList.add('shake');
+                input.addEventListener('animationend', () => {
+                    input.classList.remove('shake');
+                }, { once: true });
+
+                return;
+            }
+
+            const results = await window.Search(name);
+            console.log(results);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const nameInput = document.getElementById('name');
+            if (!nameInput) {
+                return;
+            }
+
+            nameInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    handleSearch();
+                }
+            });
+        });
     </script>
 </head>
 <body>
     <main class="app">
         <header>
             <h1>Malaina</h1>
-            <p>Generate anime relationship graphs with a cleaner, modern interface.</p>
+            <p>Generate anime relationship graphs to visualize connections between anime series.</p>
         </header>
 
         <section class="content">

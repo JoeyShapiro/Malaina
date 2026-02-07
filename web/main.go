@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"malaina/internal"
 	"syscall/js"
 )
@@ -55,7 +56,36 @@ func main() {
 
 		return js.Global().Get("Promise").New(handler)
 	}))
-	// js.Global().Get("console").Call("log", "WASM Go Initialized")
+
+	js.Global().Set("Search", js.FuncOf(func(this js.Value, args []js.Value) any {
+		handler := js.FuncOf(func(this js.Value, promiseArgs []js.Value) any {
+			resolve := promiseArgs[0]
+			reject := promiseArgs[1]
+
+			go func() {
+				media, err := internal.SearchAnime(args[0].String())
+				if err != nil {
+					reject.Invoke(js.ValueOf(err.Error()))
+				} else {
+					// cant get array to work. but id should be unique by nature
+					payload := make(map[string]any)
+					for _, m := range media {
+						title := m.Title.English
+						if title == "" {
+							title = m.Title.Romaji
+						}
+						payload[fmt.Sprint(m.Id)] = title
+					}
+
+					resolve.Invoke(js.ValueOf(payload))
+				}
+			}()
+
+			return nil
+		})
+
+		return js.Global().Get("Promise").New(handler)
+	}))
 
 	// Keep the program running
 	<-make(chan bool)
