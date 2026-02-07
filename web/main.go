@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Register a function callable from JavaScript
-	js.Global().Set("CreateGraph", js.FuncOf(func(this js.Value, args []js.Value) any {
+	js.Global().Set("MalainaCreateGraph", js.FuncOf(func(this js.Value, args []js.Value) any {
 		var progressCb js.Value
 		if len(args) > 1 && args[1].Type() == js.TypeFunction {
 			progressCb = args[1]
@@ -57,7 +57,7 @@ func main() {
 		return js.Global().Get("Promise").New(handler)
 	}))
 
-	js.Global().Set("Search", js.FuncOf(func(this js.Value, args []js.Value) any {
+	js.Global().Set("MalainaSearch", js.FuncOf(func(this js.Value, args []js.Value) any {
 		handler := js.FuncOf(func(this js.Value, promiseArgs []js.Value) any {
 			resolve := promiseArgs[0]
 			reject := promiseArgs[1]

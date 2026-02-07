@@ -189,7 +189,7 @@
                 go.run(result.instance);
             });
 
-        async function Malaina() {
+        async function CreateGraph() {
             const value = document.getElementById('aid').value;
             const barHelper = document.querySelector('.helper');
             const progressBar = document.querySelector('.progress-bar span');
@@ -203,7 +203,7 @@
             progressBar.style.width = '0%';
             barHelper.textContent = 'Starting...';
 
-            let body = await CreateGraph(aid, (progress) => {
+            let body = await window.MalainaCreateGraph(aid, (progress) => {
                 if (progress?.error) {
                     barHelper.textContent = progress.error;
                     return;
@@ -238,7 +238,7 @@
                 return;
             }
 
-            const results = await window.Search(name);
+            const results = await window.MalainaSearch(name);
             console.log(results);
         }
 
@@ -277,7 +277,7 @@
                 </div>
 
                 <div class="actions">
-                    <button onclick="Malaina()">Create Graph</button>
+                    <button onclick="CreateGraph()">Create Graph</button>
                 </div>
             </div>
 
