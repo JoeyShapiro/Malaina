@@ -6,7 +6,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"malaina/internal"
 	"syscall/js"
 )
@@ -14,6 +13,11 @@ import (
 func main() {
 	// Register a function callable from JavaScript
 	js.Global().Set("CreateGraph", js.FuncOf(func(this js.Value, args []js.Value) any {
+		var progressCb js.Value
+		if len(args) > 1 && args[1].Type() == js.TypeFunction {
+			progressCb = args[1]
+		}
+
 		handler := js.FuncOf(func(this js.Value, promiseArgs []js.Value) any {
 			resolve := promiseArgs[0]
 			reject := promiseArgs[1]
@@ -25,16 +29,16 @@ func main() {
 				wr := bytes.NewBuffer(buf)
 
 				err := internal.CreateGraph(wr, args[0].Int(), "", "", func(id, seen, queue int, err error) {
-					if err != nil {
-						if err.Error() == "Too Many Requests." {
-							js.Global().Get("console").Call("warn", "Too Many Requests. Waiting for timeout...")
+					if progressCb.Truthy() {
+						payload := map[string]any{
+							"id":    id,
+							"seen":  seen,
+							"queue": queue,
 						}
-
-						if err.Error() == "Waiting for timeout" {
-							js.Global().Get("console").Call("warn", "Waiting for timeout...")
+						if err != nil {
+							payload["error"] = err.Error()
 						}
-					} else {
-						js.Global().Get("console").Call("log", fmt.Sprintf("Querying: %d (%d / %d)", id, seen, seen+queue))
+						progressCb.Invoke(js.ValueOf(payload))
 					}
 				})
 				if err != nil {

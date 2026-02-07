@@ -158,7 +158,7 @@
         .progress-bar span {
             display: block;
             height: 100%;
-            width: 45%;
+            width: 0%;
             background: linear-gradient(90deg, var(--accent), var(--primary));
             border-radius: inherit;
         }
@@ -178,6 +178,8 @@
 
         async function Malaina() {
             const value = document.getElementById('aid').value;
+            const barHelper = document.querySelector('.helper');
+            const progressBar = document.querySelector('.progress-bar span');
             
             const aid = parseInt(value);
             if (aid === 0) {
@@ -185,8 +187,24 @@
                 return;
             }
 
-            let body = await CreateGraph(aid);
-            const newTab = window.open('about:blank', '_blank');
+            progressBar.style.width = '0%';
+            barHelper.textContent = 'Starting...';
+
+            let body = await CreateGraph(aid, (progress) => {
+                if (progress?.error) {
+                    barHelper.textContent = progress.error;
+                    return;
+                }
+
+                const id = progress?.id ?? 0;
+                const seen = Number(progress?.seen ?? 0);
+                const queue = Number(progress?.queue ?? 0);
+                const total = seen + queue;
+                const percentage = total === 0 ? 0 : (seen / total) * 100;
+                progressBar.style.width = `${percentage}%`;
+                barHelper.textContent = `Querying: ${id} (${seen} / ${total})`;
+            });
+            const newTab = window.open('', '_blank');
             newTab.document.write(body);
             newTab.document.close();
             newTab.focus();
@@ -204,17 +222,16 @@
             <div class="card">
                 <div class="field">
                     <label for="name">Anime Name</label>
-                    <input type="search" name="name" id="name" placeholder="e.g. Fullmetal Alchemist"/>
+                    <input type="search" name="name" id="name" placeholder="e.g. jjk"/>
                 </div>
 
                 <div class="field">
                     <label for="aid">Anime ID</label>
-                    <input type="number" name="aid" id="aid" placeholder="e.g. 5114"/>
+                    <input type="number" name="aid" id="aid" placeholder="e.g. 113415"/>
                 </div>
 
                 <div class="actions">
                     <button onclick="Malaina()">Create Graph</button>
-                    <button class="secondary" type="button">Preview</button>
                 </div>
             </div>
 
@@ -224,7 +241,7 @@
                     <div class="progress-bar" aria-label="Sample progress bar">
                         <span></span>
                     </div>
-                    <div class="helper">Sample placeholder (45%) — connect this to your data later.</div>
+                    <div class="helper" id="progress-helper"></div>
                 </div>
             </div>
         </section>
