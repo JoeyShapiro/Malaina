@@ -187,6 +187,10 @@
             gap: 10px;
         }
 
+            .is-hidden {
+                display: none !important;
+            }
+
         .results-title {
             font-size: 0.9rem;
             font-weight: 600;
@@ -242,12 +246,21 @@
             const value = document.getElementById('aid').value;
             const barHelper = document.querySelector('.helper');
             const progressBar = document.querySelector('.progress-bar span');
+            const progressSection = document.getElementById('progress-section');
+            const resultsSection = document.getElementById('results-section');
+            const resultsList = document.getElementById('results-list');
+            const title = document.getElementById('title');
             
             const aid = parseInt(value);
             if (aid === 0) {
                 alert("Please enter a valid Anime ID");
                 return;
             }
+
+            resultsSection.classList.add('is-hidden');
+            progressSection.classList.remove('is-hidden');
+            resultsList.innerHTML = '';
+            title.textContent = 'Progress';
 
             progressBar.style.width = '0%';
             barHelper.textContent = 'Starting...';
@@ -266,6 +279,9 @@
                 progressBar.style.width = `${percentage}%`;
                 barHelper.textContent = `Querying: ${id} (${seen} / ${total})`;
             });
+
+            barHelper.textContent = 'Finished generating graph. Opening in new tab...';
+
             const newTab = window.open('', '_blank');
             newTab.document.write(body);
             newTab.document.close();
@@ -276,6 +292,10 @@
             const name = document.getElementById('name').value;
             const resultsList = document.getElementById('results-list');
             const barHelper = document.getElementById('progress-helper');
+            const progressSection = document.getElementById('progress-section');
+            const resultsSection = document.getElementById('results-section');
+            const title = document.getElementById('title');
+
             if (!name) {
                 // make the name input shake to indicate error
                 const input = document.getElementById('name');
@@ -290,7 +310,10 @@
             }
 
             barHelper.textContent = 'Searching...';
+            progressSection.classList.add('is-hidden');
+            resultsSection.classList.remove('is-hidden');
             resultsList.innerHTML = '';
+            title.textContent = 'Search Results';
 
             const results = await window.MalainaSearch(name);
             const entries = results && typeof results === 'object' ? Object.entries(results) : [];
@@ -311,7 +334,6 @@
                 `;
                 row.addEventListener('click', () => {
                     document.getElementById('aid').value = numericId;
-                    barHelper.textContent = `Selected ID ${numericId}.`; 
                 });
 
                 resultsList.appendChild(row);
@@ -358,14 +380,15 @@
             </div>
 
             <div class="card">
-                <h3>Progress</h3>
+                <h3 id="title">Progress</h3>
                 <div class="progress-wrapper">
-                    <div class="progress-bar" aria-label="Sample progress bar">
-                        <span></span>
+                    <div id="progress-section">
+                        <div class="progress-bar" aria-label="Sample progress bar">
+                            <span></span>
+                        </div>
                     </div>
                     <div class="helper" id="progress-helper"></div>
-                    <div class="results">
-                        <div class="results-title">Search Results</div>
+                    <div class="results" id="results-section">
                         <div class="results-list" id="results-list"></div>
                     </div>
                 </div>
