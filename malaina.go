@@ -181,7 +181,7 @@ type ResponseAnime struct {
 }
 
 type ResponseSearch struct {
-	Data struct {
+	Data struct { // could maybe do Data T, but not really the golang style
 		Page struct {
 			Media []Media `json:"media"`
 		} `json:"Page"`
@@ -220,7 +220,6 @@ type Link struct {
 	Relation string
 }
 
-// TODO also convert to response and handle errors
 func queryAnilist(query map[string]string) (data []byte, err error) {
 	jsonValue, _ := json.Marshal(query)
 
