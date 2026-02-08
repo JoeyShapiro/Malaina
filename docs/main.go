@@ -1,7 +1,5 @@
 //go:build js && wasm
 
-// TODO where is the idiomatic place to put main for wasm builds
-
 package main
 
 import (
