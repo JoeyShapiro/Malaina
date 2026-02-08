@@ -6,11 +6,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"malaina"
 	"os"
 	"os/exec"
 	"runtime"
-
-	"malaina/internal"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/schollz/progressbar/v3"
@@ -63,7 +62,8 @@ func main() {
 		}))
 	barTimeout.Clear()
 
-	err = internal.CreateGraph(f, *fid, *fexport, *fimport, func(id, seen, queue int, err error) {
+	// TODO could do a .WithProgress() that combines the two bars, but this is fine for now
+	err = malaina.CreateGraph(f, *fid, *fexport, *fimport, func(id, seen, queue int, err error) {
 		if err != nil {
 			if err.Error() == "Too Many Requests." {
 				barTimeout.Reset()
@@ -106,7 +106,7 @@ func openBrowser(url string) error {
 }
 
 func searchAnimeId(name string) (id int, err error) {
-	media, err := internal.SearchAnime(name)
+	media, err := malaina.SearchAnime(name)
 	if err != nil {
 		return id, errors.New("Error searching anime: " + err.Error())
 	}

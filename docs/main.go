@@ -5,7 +5,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"malaina/internal"
+	"malaina"
 	"syscall/js"
 )
 
@@ -27,7 +27,7 @@ func main() {
 				var buf []byte
 				wr := bytes.NewBuffer(buf)
 
-				err := internal.CreateGraph(wr, args[0].Int(), "", "", func(id, seen, queue int, err error) {
+				err := malaina.CreateGraph(wr, args[0].Int(), "", "", func(id, seen, queue int, err error) {
 					if progressCb.Truthy() {
 						payload := map[string]any{
 							"id":    id,
@@ -61,7 +61,7 @@ func main() {
 			reject := promiseArgs[1]
 
 			go func() {
-				media, err := internal.SearchAnime(args[0].String())
+				media, err := malaina.SearchAnime(args[0].String())
 				if err != nil {
 					reject.Invoke(js.ValueOf(err.Error()))
 				} else {

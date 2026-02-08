@@ -1,6 +1,4 @@
-package internal
-
-// TODO is this internal or nothing or another folder called malaina
+package malaina
 
 import (
 	"bytes"
@@ -24,7 +22,6 @@ var RelatedTypes = []string{
 	"SUMMARY",
 }
 
-// TODO maybe move to malaina package
 func CreateGraph(wr io.Writer, anime int, fexport string, fimport string, progress func(id int, seen int, queue int, err error)) (err error) {
 	var medias []Media
 	if anime != 0 {
@@ -333,4 +330,13 @@ func SearchAnime(name string) (media []Media, err error) {
 	}
 
 	return res.Data.Page.Media, nil
+}
+
+func Contains[T any](slice []T, value T, comp func(T, T) bool) bool {
+	for _, item := range slice {
+		if comp(item, value) {
+			return true
+		}
+	}
+	return false
 }
