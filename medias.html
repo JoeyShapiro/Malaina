@@ -1,0 +1,2804 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fate/Zero Connections</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+    }
+    
+    svg {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .links line {
+      stroke-opacity: 0.6;
+      transition: stroke-width 0.3s;
+    }
+    
+    .node-card {
+      fill: white;
+      stroke: #ddd;
+      stroke-width: 1px;
+      rx: 5;
+      ry: 5;
+    }
+    
+    .node-card:hover {
+      stroke: #666;
+      stroke-width: 2px;
+      filter: drop-shadow(0 0 5px rgba(0,0,0,0.3));
+    }
+    
+    .node-title {
+      font-size: 12px;
+      font-weight: bold;
+      text-anchor: middle;
+      pointer-events: none;
+    }
+    
+    .node-stats {
+      font-size: 10px;
+      pointer-events: none;
+    }
+    
+    .node-image-bg {
+      fill: #f0f0f0;
+      rx: 5;
+      ry: 5;
+    }
+    
+    h1 {
+      color: #333;
+      padding-left: 1em;
+      padding-right: 1em;
+      padding-top: 2px;
+      margin: 0;
+    }
+    
+    .controls {
+      margin: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    button {
+      padding: 8px 12px;
+      margin: 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .legend {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 20px;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 5px;
+      margin-right: 5px;
+    }
+    
+    .tooltip {
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 1000;
+    }
+    
+    .highlighted {
+      stroke-width: 4px !important;
+    }
+  </style>
+</head>
+<body>
+  <h1>Fate/Zero Connections</h1>
+  <div class="container">
+    <div id="graph"></div>
+    <div class="controls">
+      <h3>Total Episodes: 262</h3>
+      <h3>Total Minutes: 6508</h3>
+      <button id="resetLayout">Reset Layout</button>
+      <button id="toggleLabels">Toggle Labels</button>
+      <div id="legend" class="legend"></div>
+    </div>
+    <div id="tooltip" class="tooltip"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+  <script>
+    
+    const graphData = {
+      nodes: [
+
+        { 
+          id:  10087 ,
+        
+          name: "Fate\/Zero", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx10087-M4Hd9qrHGrXk.png",
+          stats: {
+            episodes:  13 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  11741 ,
+        
+          name: "Fate\/Zero Season 2", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx11741-oEy1fJHYm2zJ.jpg",
+          stats: {
+            episodes:  12 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  13263 ,
+        
+          name: "Fate\/Zero: Please! Einzbern Counseling Room", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/13263-TtCqlSFIpfrM.jpg",
+          stats: {
+            episodes:  6 ,
+            duration:  15 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  55191 ,
+        
+          name: "Fate\/Zero", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx55191-S9OMEuCVGo15.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  19603 ,
+        
+          name: "Fate\/stay night: Unlimited Blade Works", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx19603-ycT0pyEgDVQu.jpg",
+          stats: {
+            episodes:  13 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  20791 ,
+        
+          name: "Fate\/stay night [Heaven\u0027s Feel] I. presage flower", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx20791-yPCX5GJuMH2k.png",
+          stats: {
+            episodes:  1 ,
+            duration:  120 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  356 ,
+        
+          name: "Fate\/stay night", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx356-mTpMvtillumS.png",
+          stats: {
+            episodes:  24 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  6922 ,
+        
+          name: "Fate\/stay night: Unlimited Blade Works (Movie)", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx6922-g3hsIYOWGXL8.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  105 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  106918 ,
+        
+          name: "Lord El-Melloi II\u0027s Case Files {Rail Zeppelin} Grace note", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx106918-4T0AdnCg8d64.jpg",
+          stats: {
+            episodes:  13 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  192970 ,
+        
+          name: "Fate\/Zero Cafe: Fate\/Zero Cafe Tsudou Eireitachi",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx192970-fYsKf4nCYRQF.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  20792 ,
+        
+          name: "Fate\/stay night: Unlimited Blade Works 2nd Season", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx20792-Q53sZsUAh5FF.jpg",
+          stats: {
+            episodes:  13 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  14829 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx14829-PZVOr1ZxwOJV.png",
+          stats: {
+            episodes:  10 ,
+            duration:  24 ,
+            format: "ONA"
+          }
+        },
+
+        { 
+          id:  98035 ,
+        
+          name: "Fate\/Apocrypha", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx98035-rdkjeqUUsG2j.jpg",
+          stats: {
+            episodes:  25 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  131587 ,
+        
+          name: "Fate\/stay night: Unlimited Blade Works",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx131587-axp0w90Vhbyq.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  21717 ,
+        
+          name: "Fate\/EXTRA Last Encore", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/nx21717-2gU0L4IvrUVC.jpg",
+          stats: {
+            episodes:  13 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  12565 ,
+        
+          name: "Fate\/Prototype",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx12565-paVJhzp4BrF0.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  12 ,
+            format: "OVA"
+          }
+        },
+
+        { 
+          id:  97815 ,
+        
+          name: "Fate\/Grand Order: First Order", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx97815-NnWheNnaKCmS.png",
+          stats: {
+            episodes:  1 ,
+            duration:  74 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  21718 ,
+        
+          name: "Fate\/stay night [Heaven\u0027s Feel] II. lost butterfly", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx21718-Hjj26Sapx1bd.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  117 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  30715 ,
+        
+          name: "Fate\/stay night", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/nx30715-Y6FYtdEQm0SV.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  21318 ,
+        
+          name: "Fate\/stay night: Unlimited Blade Works 2nd Season - sunny day", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/21318-l441SwTgnl5h.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  10 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  106862 ,
+        
+          name: "Lord El-Melloi II\u0027s Case Files {Rail Zeppelin} Grace note - A Grave Keeper, a Cat, and a Mage", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx106862-IFmkASZSrcGw.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  25 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  103075 ,
+        
+          name: "Lord El-Melloi II-sei no Jikenbo",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/nx103075-vPAUoTF26LXE.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  136344 ,
+        
+          name: "Lord El-Melloi II’s Case Files {Rail Zeppelin} Grace note -Special Episode-", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx136344-XwEsuW9mmTZB.png",
+          stats: {
+            episodes:  1 ,
+            duration:  53 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  19109 ,
+        
+          name: "Fate\/Kaleid liner Prisma Illya Specials", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/19109.jpg",
+          stats: {
+            episodes:  5 ,
+            duration:  5 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  18851 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya: Dance at the Sports Festival!", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx18851-6TjNHfkWaB6B.png",
+          stats: {
+            episodes:  1 ,
+            duration:  25 ,
+            format: "OVA"
+          }
+        },
+
+        { 
+          id:  87195 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/57195-5ulDdzVbDOSi.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  87251 ,
+        
+          name: "Fate\/Apocrypha",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx87251-B1GLDEoQSLCS.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  33649 ,
+        
+          name: "Fate\/Zero",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/33649-rA0ZBSbWhPkH.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  81987 ,
+        
+          name: "Fate\/hollow ataraxia",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx81987-4RlLPQf5Ytk3.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  138258 ,
+        
+          name: "Fate\/stay night: 15-nen no Kiseki TYPE-MOON Ten",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx138258-7sPbaDaGAa2K.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  62425 ,
+        
+          name: "Fate\/EXTRA",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx62425-HyG0fRGW7DIO.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  87200 ,
+        
+          name: "Fate\/Extra CCC: Fox Tail",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx87200-nZKFkeoS46Us.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  110891 ,
+        
+          name: "Fate\/Extra CCC Trial",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx110891-SA55xcoyJs66.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  87201 ,
+        
+          name: "Fate\/Extra CCC",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b87201-taYYydBerzFc.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  53568 ,
+        
+          name: "Fate\/Extra",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/23568.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "ONE_SHOT"
+          }
+        },
+
+        { 
+          id:  85754 ,
+        
+          name: "Fate\/Prototype: Sougin no Fragments",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx85754-9Zfg1wVSHjx0.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  100729 ,
+        
+          name: "Fate\/Grand Order: Himuro no Tenchi - 7-nin no Saikyou Gijin-hen", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx100729-1TmNAHJ9468j.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  14 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  103276 ,
+        
+          name: "Fate\/Grand Order Divine Realm of the Round Table: Camelot - Wandering; Agateram", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx103276-7QhBwJs0O6Gi.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  89 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  110297 ,
+        
+          name: "Fate\/Grand Order: turas réalta",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx110297-gwhX0zJHnaQH.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  108178 ,
+        
+          name: "Fate\/Grand Order -mortalis:stella-", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b108178-nb3NJMe71aeQ.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  21719 ,
+        
+          name: "Fate\/stay night [Heaven’s Feel] III. spring song", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx21719-MSdTlkno0Z0u.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  122 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  86182 ,
+        
+          name: "Fate\/stay night [Heaven\u0027s Feel]",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx86182-Fh9yKirTQWmF.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  100855 ,
+        
+          name: "Today\u0027s Menu for the Emiya Family", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx100855-r8cXwdCschnX.jpg",
+          stats: {
+            episodes:  13 ,
+            duration:  14 ,
+            format: "ONA"
+          }
+        },
+
+        { 
+          id:  57327 ,
+        
+          name: "ALL AROUND TYPE-MOON",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/27327.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  87199 ,
+        
+          name: "Today\u0027s Menu for the Emiya Family", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx87199-FIDtDuejbW15.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  33526 ,
+        
+          name: "Fate\/Kaleid Liner Prisma Illya", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/nx33526-vWnQdnv0SyFj.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  49381 ,
+        
+          name: "Himuro no Tenchi: Fate\/school Life",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx49381-PVSFXKh6aJ5G.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  87196 ,
+        
+          name: "Type-Moon Gakuen: Chibichuki!",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx87196-O0Zzvbq2Lw6Y.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  63005 ,
+        
+          name: "Fate\/Apocrypha",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/33005.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  116144 ,
+        
+          name: "Fate\/mahjong night Seihai Sensou",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx116144-8wHR88m1oiDQ.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  96082 ,
+        
+          name: "Fate\/tiger Colosseum Upper",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b96082-Qu1yWou0eZvQ.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "ONE_SHOT"
+          }
+        },
+
+        { 
+          id:  80295 ,
+        
+          name: "Fate\/Apocrypha: Unbirth",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b80295-EUrf4bzmJhyE.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  108493 ,
+        
+          name: "Fate\/Requiem",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx108493-Mlv4wQlAWFUQ.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  50006 ,
+        
+          name: "Fate\/strange Fake",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx50006-SzwC3M73aM2X.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  20467 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya 2wei!", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/nx20467-GwWFUCzsiUF7.png",
+          stats: {
+            episodes:  10 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  189907 ,
+        
+          name: "Fate\/hollow ataraxia Comic Anthology",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b189907-WzY9D3J8ooOt.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  202596 ,
+        
+          name: "Fate\/EXTRA CCC: VOID LOG:BLOOM ECHO",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx202596-ALdnGVzkfiqi.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  94656 ,
+        
+          name: "Fate\/Labyrinth",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx94656-z6oMt7rjqlyB.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  71681 ,
+        
+          name: "Fate\/Prototype Tribute Phantasm",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx71681-5afUOC7x1OF4.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  100728 ,
+        
+          name: "Fate\/Grand Order -MOONLIGHT\/LOSTROOM-", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx100728-rChlxr9tE5qx.png",
+          stats: {
+            episodes:  1 ,
+            duration:  32 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  103277 ,
+        
+          name: "Fate\/Grand Order Divine Realm of the Round Table: Camelot - Paladin; Agateram", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx103277-BuAfaC3dKOUp.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  96 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  107553 ,
+        
+          name: "Fate\/Grand Order: Epic of Remnant - Ashu Tokuiten I Akushou Kakuzetsu Makyou Shinjuku - Shinjuku Maboroshi Tamashi Jiken",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx107553-RT9Cbgv4y2ok.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  103275 ,
+        
+          name: "Fate\/Grand Order Absolute Demonic Front: Babylonia", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx103275-SN0wwshS3tWA.jpg",
+          stats: {
+            episodes:  21 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  172591 ,
+        
+          name: "Fate\/Grand Order: Eirei Denshou Ibun - Ashiya Douman : Itsumade",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b172591-HN9Fk5mfRk2g.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  181379 ,
+        
+          name: "Fate\/Grand Order: Penthesilea Makuai no Monogatari \u0022Troia no Genei\u0022",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx181379-PfP174f9StoH.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "ONE_SHOT"
+          }
+        },
+
+        { 
+          id:  30705 ,
+        
+          name: "Lunar Legend Tsukihime", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx30705-SoAVZ3WsyoB5.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  85136 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya 2wei!",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/nx85136-KjiY2qIWcSd8.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  30707 ,
+        
+          name: "Melty Blood",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx30707-oXVAloPUc3RC.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  40429 ,
+        
+          name: "Kara no Kyoukai: Mirai Fukuin - The Garden of Sinners\/Recalled Out Summer",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx40429-FONdII9NCxCX.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  87202 ,
+        
+          name: "Mahou Tsukai no Hako: Starlit Marmalade",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/57202-2GlUWkcuf3Yj.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  153991 ,
+        
+          name: "Fate:Lost Einherjar - Kyokkou no Aslaug",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx153991-EJhYjx12qDJ2.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  20845 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya 2wei! Herz!", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx20845-4iTgYkjPsUYh.png",
+          stats: {
+            episodes:  10 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  20862 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya 2wei! OVA", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx20862-EwdOS4tKrAKP.png",
+          stats: {
+            episodes:  1 ,
+            duration:  26 ,
+            format: "OVA"
+          }
+        },
+
+        { 
+          id:  66803 ,
+        
+          name: "Heart of Freaks",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/36803-9RxHoOUtgst9.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "NOVEL"
+          }
+        },
+
+        { 
+          id:  75417 ,
+        
+          name: "Sensha Otoko: A True Tank Story",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b75417-5sraIRDhxn73.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "ONE_SHOT"
+          }
+        },
+
+        { 
+          id:  116756 ,
+        
+          name: "Fate\/Grand Order Final Singularity - Grand Temple of Time: Solomon", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx116756-jIU2HrnEsDjR.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  94 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  108299 ,
+        
+          name: "Fate\/Grand Order: Epic of Remnant - Ashutokuiten EX Shinkai Dennou Rakudo SE.RA.PH",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx108299-fmX65nMgGGfp.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  110851 ,
+        
+          name: "Fate\/Grand Order Absolute Demonic Front: Babylonia - Initium Iter", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx110851-cGL0eaATevX3.png",
+          stats: {
+            episodes:  1 ,
+            duration:  27 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  169 ,
+        
+          name: "Lunar Legend Tsukihime", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx169-ATwPxULRSDRr.jpg",
+          stats: {
+            episodes:  12 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  159094 ,
+        
+          name: "MELTY BLOOD: TYPE LUMINA Piece in Paradise",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx159094-wosRhCTts1VX.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  146943 ,
+        
+          name: "Tsukihime: A piece of blue glass moon - Anthology Comic STAR",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx146943-YYkQcZtQdLhs.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  153100 ,
+        
+          name: "Tsukihime: A piece of blue glass moon - Comic à la Carte",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b153100-57RtOxQ2oxyU.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  142992 ,
+        
+          name: "Tsukihime: A piece of blue glass moon - Comic Anthology",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx142992-yhSpQvWw5lf6.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  161690 ,
+        
+          name: "Tsukihime Comic Anthology",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/b161690-YNUeWA5nlGfM.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  187572 ,
+        
+          name: "Tsukihime: A Piece of Blue Glass Moon - Moon Phase",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx187572-B4fMrXDS7li0.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  66131 ,
+        
+          name: "Fate\/kaleid liner Prisma ☆ Illya Drei 3!!", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/nx66131-w94lTVMjhs6R.png",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  75949 ,
+        
+          name: "Hana no Miyako!",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx75949-NAlOrxlSKlWd.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  55629 ,
+        
+          name: "Melty Blood X",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx55629-Fn6lot1bEkFJ.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  109431 ,
+        
+          name: "Melty Blood: Rojiura Nightmare",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx109431-IjOgvFjYle7n.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  21325 ,
+        
+          name: "Fate\/kaleid liner Prisma Illya 2wei Herz! Kanzen Shinsaku Short Anime", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/21325-6HDvo0TFwWPr.jpg",
+          stats: {
+            episodes:  5 ,
+            duration:  7 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  107554 ,
+        
+          name: "Fate\/Grand Order: Epic of Remnant - Ashu Tokuiten II Denshou Chitei Sekai Agartha - Agartha no Onna",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx107554-RIcPCnPADaow.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  114017 ,
+        
+          name: "Fate\/Grand Order: Chaldea Scrapbook", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx114017-VbDAbcshjWti.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  21379 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya 3rei!!", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx21379-RDJgELNOIGDS.png",
+          stats: {
+            episodes:  12 ,
+            duration:  24 ,
+            format: "TV"
+          }
+        },
+
+        { 
+          id:  20945 ,
+        
+          name: "Fate\/Kaleid liner Prisma Illya 2wei! Kanzen Shinsaku Short Anime", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/20945-GRrTy6zJiO2j.jpg",
+          stats: {
+            episodes:  5 ,
+            duration:  6 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  107555 ,
+        
+          name: "Fate\/Grand Order -Epic of Remnant- Pseudo-Singularity III: The Stage of Carnage, Shimousa – Seven Duels of Swordmasters", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx107555-qoLmnmwQUli7.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  87488 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya 3rei!! Specials",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/b87488-J391CPa97PDm.jpg",
+          stats: {
+            episodes:  6 ,
+            duration:  5 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  118743 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya: Licht Nameless Girl", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx118743-T2Zm7kA33pnj.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  94 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  97757 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya: Vow in the Snow", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/b97757-BWFRkX81LpGS.png",
+          stats: {
+            episodes:  1 ,
+            duration:  89 ,
+            format: "MOVIE"
+          }
+        },
+
+        { 
+          id:  107556 ,
+        
+          name: "Fate\/Grand Order: Epic of Remnant - Ashu Tokuiten IV Kinki Kourin Teien Salem - Itan Naru Salem",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/manga\/cover\/small\/bx107556-nW0IwkJPQk5h.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: "MANGA"
+          }
+        },
+
+        { 
+          id:  138511 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya (Provisional Title)",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx138511-sMxqJBKwWLlk.jpg",
+          stats: {
+            episodes:  0 ,
+            duration:  0 ,
+            format: ""
+          }
+        },
+
+        { 
+          id:  101100 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya: Sekka no Chikai - Kuro Sakura no Heya",
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/nx101100-ZTDdP3CXeF8C.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  6 ,
+            format: "SPECIAL"
+          }
+        },
+
+        { 
+          id:  100269 ,
+        
+          name: "Fate\/kaleid liner Prisma☆Illya: Prisma☆Phantasm", 
+        
+          group: 1,
+          image: "https:\/\/s4.anilist.co\/file\/anilistcdn\/media\/anime\/cover\/small\/bx100269-V8Z7e1OXrDBZ.jpg",
+          stats: {
+            episodes:  1 ,
+            duration:  62 ,
+            format: "OVA"
+          }
+        },
+
+      ],
+      links: [
+
+      { source:  11741 , target:  10087 , value: "SEQUEL" },
+
+      { source:  33649 , target:  10087 , value: "ADAPTATION" },
+
+      { source:  13263 , target:  10087 , value: "SIDE_STORY" },
+
+      { source:  55191 , target:  10087 , value: "ALTERNATIVE" },
+
+      { source:  10087 , target:  11741 , value: "PREQUEL" },
+
+      { source:  19603 , target:  11741 , value: "SEQUEL" },
+
+      { source:  20791 , target:  11741 , value: "SEQUEL" },
+
+      { source:  356 , target:  11741 , value: "SEQUEL" },
+
+      { source:  6922 , target:  11741 , value: "SEQUEL" },
+
+      { source:  13263 , target:  11741 , value: "SIDE_STORY" },
+
+      { source:  33649 , target:  11741 , value: "ADAPTATION" },
+
+      { source:  66803 , target:  11741 , value: "ADAPTATION" },
+
+      { source:  55191 , target:  11741 , value: "ALTERNATIVE" },
+
+      { source:  106918 , target:  11741 , value: "SPIN_OFF" },
+
+      { source:  10087 , target:  13263 , value: "PARENT" },
+
+      { source:  11741 , target:  13263 , value: "PARENT" },
+
+      { source:  33649 , target:  55191 , value: "ADAPTATION" },
+
+      { source:  10087 , target:  55191 , value: "ALTERNATIVE" },
+
+      { source:  11741 , target:  55191 , value: "ALTERNATIVE" },
+
+      { source:  114017 , target:  55191 , value: "CHARACTER" },
+
+      { source:  103075 , target:  55191 , value: "CHARACTER" },
+
+      { source:  192970 , target:  55191 , value: "SPIN_OFF" },
+
+      { source:  356 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  11741 , target:  19603 , value: "PREQUEL" },
+
+      { source:  20792 , target:  19603 , value: "SEQUEL" },
+
+      { source:  14829 , target:  19603 , value: "SPIN_OFF" },
+
+      { source:  6922 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  98035 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  131587 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  21717 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  12565 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  97815 , target:  19603 , value: "ALTERNATIVE" },
+
+      { source:  356 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  11741 , target:  20791 , value: "PREQUEL" },
+
+      { source:  6922 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  21718 , target:  20791 , value: "SEQUEL" },
+
+      { source:  19603 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  86182 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  98035 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  21717 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  14829 , target:  20791 , value: "SPIN_OFF" },
+
+      { source:  12565 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  97815 , target:  20791 , value: "ALTERNATIVE" },
+
+      { source:  11741 , target:  356 , value: "PREQUEL" },
+
+      { source:  6922 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  12565 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  19603 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  14829 , target:  356 , value: "SPIN_OFF" },
+
+      { source:  100855 , target:  356 , value: "SPIN_OFF" },
+
+      { source:  30715 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  98035 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  21717 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  97815 , target:  356 , value: "ALTERNATIVE" },
+
+      { source:  356 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  11741 , target:  6922 , value: "PREQUEL" },
+
+      { source:  19603 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  98035 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  14829 , target:  6922 , value: "SPIN_OFF" },
+
+      { source:  21717 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  12565 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  131587 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  21318 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  97815 , target:  6922 , value: "ALTERNATIVE" },
+
+      { source:  106862 , target:  106918 , value: "PREQUEL" },
+
+      { source:  103075 , target:  106918 , value: "ALTERNATIVE" },
+
+      { source:  136344 , target:  106918 , value: "SEQUEL" },
+
+      { source:  11741 , target:  106918 , value: "PARENT" },
+
+      { source:  33649 , target:  192970 , value: "CHARACTER" },
+
+      { source:  55191 , target:  192970 , value: "PARENT" },
+
+      { source:  19603 , target:  20792 , value: "PREQUEL" },
+
+      { source:  21318 , target:  20792 , value: "ALTERNATIVE" },
+
+      { source:  131587 , target:  20792 , value: "ALTERNATIVE" },
+
+      { source:  33526 , target:  14829 , value: "ADAPTATION" },
+
+      { source:  19109 , target:  14829 , value: "SIDE_STORY" },
+
+      { source:  18851 , target:  14829 , value: "SEQUEL" },
+
+      { source:  356 , target:  14829 , value: "PARENT" },
+
+      { source:  19603 , target:  14829 , value: "PARENT" },
+
+      { source:  20791 , target:  14829 , value: "PARENT" },
+
+      { source:  87195 , target:  14829 , value: "ALTERNATIVE" },
+
+      { source:  100269 , target:  14829 , value: "CHARACTER" },
+
+      { source:  6922 , target:  14829 , value: "PARENT" },
+
+      { source:  63005 , target:  98035 , value: "ADAPTATION" },
+
+      { source:  356 , target:  98035 , value: "ALTERNATIVE" },
+
+      { source:  6922 , target:  98035 , value: "ALTERNATIVE" },
+
+      { source:  19603 , target:  98035 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  98035 , value: "ALTERNATIVE" },
+
+      { source:  87251 , target:  98035 , value: "ALTERNATIVE" },
+
+      { source:  6922 , target:  131587 , value: "ALTERNATIVE" },
+
+      { source:  30715 , target:  131587 , value: "ALTERNATIVE" },
+
+      { source:  19603 , target:  131587 , value: "ALTERNATIVE" },
+
+      { source:  20792 , target:  131587 , value: "ALTERNATIVE" },
+
+      { source:  33649 , target:  131587 , value: "PREQUEL" },
+
+      { source:  86182 , target:  131587 , value: "ALTERNATIVE" },
+
+      { source:  81987 , target:  131587 , value: "SEQUEL" },
+
+      { source:  114017 , target:  131587 , value: "CHARACTER" },
+
+      { source:  138258 , target:  131587 , value: "SEQUEL" },
+
+      { source:  87199 , target:  131587 , value: "CHARACTER" },
+
+      { source:  62425 , target:  21717 , value: "ALTERNATIVE" },
+
+      { source:  6922 , target:  21717 , value: "ALTERNATIVE" },
+
+      { source:  87200 , target:  21717 , value: "SPIN_OFF" },
+
+      { source:  110891 , target:  21717 , value: "SPIN_OFF" },
+
+      { source:  87201 , target:  21717 , value: "SPIN_OFF" },
+
+      { source:  53568 , target:  21717 , value: "ALTERNATIVE" },
+
+      { source:  356 , target:  21717 , value: "ALTERNATIVE" },
+
+      { source:  19603 , target:  21717 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  21717 , value: "ALTERNATIVE" },
+
+      { source:  356 , target:  12565 , value: "ALTERNATIVE" },
+
+      { source:  85754 , target:  12565 , value: "PREQUEL" },
+
+      { source:  71681 , target:  12565 , value: "SIDE_STORY" },
+
+      { source:  6922 , target:  12565 , value: "ALTERNATIVE" },
+
+      { source:  19603 , target:  12565 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  12565 , value: "ALTERNATIVE" },
+
+      { source:  100728 , target:  97815 , value: "SPIN_OFF" },
+
+      { source:  100729 , target:  97815 , value: "SPIN_OFF" },
+
+      { source:  103276 , target:  97815 , value: "SEQUEL" },
+
+      { source:  110297 , target:  97815 , value: "ALTERNATIVE" },
+
+      { source:  108178 , target:  97815 , value: "ALTERNATIVE" },
+
+      { source:  6922 , target:  97815 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  97815 , value: "ALTERNATIVE" },
+
+      { source:  356 , target:  97815 , value: "ALTERNATIVE" },
+
+      { source:  19603 , target:  97815 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  21718 , value: "PREQUEL" },
+
+      { source:  21719 , target:  21718 , value: "SEQUEL" },
+
+      { source:  86182 , target:  21718 , value: "ALTERNATIVE" },
+
+      { source:  86182 , target:  30715 , value: "ALTERNATIVE" },
+
+      { source:  33649 , target:  30715 , value: "PREQUEL" },
+
+      { source:  81987 , target:  30715 , value: "SEQUEL" },
+
+      { source:  57327 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  87199 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  53568 , target:  30715 , value: "ALTERNATIVE" },
+
+      { source:  62425 , target:  30715 , value: "ALTERNATIVE" },
+
+      { source:  33526 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  49381 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  87196 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  63005 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  356 , target:  30715 , value: "ALTERNATIVE" },
+
+      { source:  116144 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  131587 , target:  30715 , value: "ALTERNATIVE" },
+
+      { source:  75949 , target:  30715 , value: "CHARACTER" },
+
+      { source:  96082 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  80295 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  138258 , target:  30715 , value: "SEQUEL" },
+
+      { source:  108493 , target:  30715 , value: "SPIN_OFF" },
+
+      { source:  50006 , target:  30715 , value: "SEQUEL" },
+
+      { source:  20792 , target:  21318 , value: "ALTERNATIVE" },
+
+      { source:  6922 , target:  21318 , value: "ALTERNATIVE" },
+
+      { source:  106918 , target:  106862 , value: "SEQUEL" },
+
+      { source:  106918 , target:  103075 , value: "ALTERNATIVE" },
+
+      { source:  55191 , target:  103075 , value: "CHARACTER" },
+
+      { source:  106918 , target:  136344 , value: "PREQUEL" },
+
+      { source:  14829 , target:  19109 , value: "PARENT" },
+
+      { source:  33526 , target:  18851 , value: "ADAPTATION" },
+
+      { source:  14829 , target:  18851 , value: "PREQUEL" },
+
+      { source:  20467 , target:  18851 , value: "SEQUEL" },
+
+      { source:  33526 , target:  87195 , value: "ADAPTATION" },
+
+      { source:  14829 , target:  87195 , value: "ALTERNATIVE" },
+
+      { source:  63005 , target:  87251 , value: "ADAPTATION" },
+
+      { source:  98035 , target:  87251 , value: "ALTERNATIVE" },
+
+      { source:  10087 , target:  33649 , value: "ADAPTATION" },
+
+      { source:  55191 , target:  33649 , value: "ADAPTATION" },
+
+      { source:  11741 , target:  33649 , value: "ADAPTATION" },
+
+      { source:  66803 , target:  33649 , value: "SIDE_STORY" },
+
+      { source:  30715 , target:  33649 , value: "SEQUEL" },
+
+      { source:  75417 , target:  33649 , value: "SPIN_OFF" },
+
+      { source:  87196 , target:  33649 , value: "SPIN_OFF" },
+
+      { source:  131587 , target:  33649 , value: "SEQUEL" },
+
+      { source:  86182 , target:  33649 , value: "SEQUEL" },
+
+      { source:  50006 , target:  33649 , value: "SPIN_OFF" },
+
+      { source:  57327 , target:  33649 , value: "CHARACTER" },
+
+      { source:  192970 , target:  33649 , value: "CHARACTER" },
+
+      { source:  30715 , target:  81987 , value: "PREQUEL" },
+
+      { source:  49381 , target:  81987 , value: "SPIN_OFF" },
+
+      { source:  87196 , target:  81987 , value: "SPIN_OFF" },
+
+      { source:  131587 , target:  81987 , value: "PREQUEL" },
+
+      { source:  86182 , target:  81987 , value: "PREQUEL" },
+
+      { source:  57327 , target:  81987 , value: "CHARACTER" },
+
+      { source:  87199 , target:  81987 , value: "CHARACTER" },
+
+      { source:  108493 , target:  81987 , value: "CHARACTER" },
+
+      { source:  189907 , target:  81987 , value: "SIDE_STORY" },
+
+      { source:  86182 , target:  138258 , value: "PREQUEL" },
+
+      { source:  131587 , target:  138258 , value: "PREQUEL" },
+
+      { source:  30715 , target:  138258 , value: "PREQUEL" },
+
+      { source:  53568 , target:  62425 , value: "ALTERNATIVE" },
+
+      { source:  30715 , target:  62425 , value: "ALTERNATIVE" },
+
+      { source:  87200 , target:  62425 , value: "SPIN_OFF" },
+
+      { source:  87196 , target:  62425 , value: "SPIN_OFF" },
+
+      { source:  87201 , target:  62425 , value: "SEQUEL" },
+
+      { source:  21717 , target:  62425 , value: "ALTERNATIVE" },
+
+      { source:  57327 , target:  62425 , value: "CHARACTER" },
+
+      { source:  109431 , target:  62425 , value: "CHARACTER" },
+
+      { source:  87196 , target:  87200 , value: "SPIN_OFF" },
+
+      { source:  62425 , target:  87200 , value: "PARENT" },
+
+      { source:  87201 , target:  87200 , value: "PARENT" },
+
+      { source:  21717 , target:  87200 , value: "PARENT" },
+
+      { source:  108299 , target:  87200 , value: "CHARACTER" },
+
+      { source:  87201 , target:  110891 , value: "ALTERNATIVE" },
+
+      { source:  21717 , target:  110891 , value: "PARENT" },
+
+      { source:  62425 , target:  87201 , value: "PREQUEL" },
+
+      { source:  87200 , target:  87201 , value: "SPIN_OFF" },
+
+      { source:  110891 , target:  87201 , value: "ALTERNATIVE" },
+
+      { source:  21717 , target:  87201 , value: "PARENT" },
+
+      { source:  87196 , target:  87201 , value: "CHARACTER" },
+
+      { source:  108299 , target:  87201 , value: "CHARACTER" },
+
+      { source:  108493 , target:  87201 , value: "CHARACTER" },
+
+      { source:  202596 , target:  87201 , value: "ALTERNATIVE" },
+
+      { source:  62425 , target:  53568 , value: "ALTERNATIVE" },
+
+      { source:  30715 , target:  53568 , value: "ALTERNATIVE" },
+
+      { source:  21717 , target:  53568 , value: "ALTERNATIVE" },
+
+      { source:  12565 , target:  85754 , value: "SEQUEL" },
+
+      { source:  94656 , target:  85754 , value: "SIDE_STORY" },
+
+      { source:  71681 , target:  85754 , value: "CHARACTER" },
+
+      { source:  97815 , target:  100729 , value: "PARENT" },
+
+      { source:  49381 , target:  100729 , value: "ADAPTATION" },
+
+      { source:  103277 , target:  103276 , value: "SEQUEL" },
+
+      { source:  97815 , target:  103276 , value: "PREQUEL" },
+
+      { source:  108178 , target:  110297 , value: "ALTERNATIVE" },
+
+      { source:  97815 , target:  110297 , value: "ALTERNATIVE" },
+
+      { source:  107553 , target:  110297 , value: "SEQUEL" },
+
+      { source:  87196 , target:  110297 , value: "CHARACTER" },
+
+      { source:  109431 , target:  110297 , value: "CHARACTER" },
+
+      { source:  103275 , target:  110297 , value: "ALTERNATIVE" },
+
+      { source:  159094 , target:  110297 , value: "CHARACTER" },
+
+      { source:  114017 , target:  110297 , value: "CHARACTER" },
+
+      { source:  172591 , target:  110297 , value: "PARENT" },
+
+      { source:  108493 , target:  110297 , value: "CHARACTER" },
+
+      { source:  181379 , target:  110297 , value: "SIDE_STORY" },
+
+      { source:  110297 , target:  108178 , value: "ALTERNATIVE" },
+
+      { source:  97815 , target:  108178 , value: "ALTERNATIVE" },
+
+      { source:  109431 , target:  108178 , value: "CHARACTER" },
+
+      { source:  87196 , target:  108178 , value: "CHARACTER" },
+
+      { source:  107553 , target:  108178 , value: "SEQUEL" },
+
+      { source:  159094 , target:  108178 , value: "CHARACTER" },
+
+      { source:  114017 , target:  108178 , value: "CHARACTER" },
+
+      { source:  172591 , target:  108178 , value: "PARENT" },
+
+      { source:  181379 , target:  108178 , value: "SIDE_STORY" },
+
+      { source:  21718 , target:  21719 , value: "PREQUEL" },
+
+      { source:  86182 , target:  21719 , value: "ALTERNATIVE" },
+
+      { source:  30715 , target:  86182 , value: "ALTERNATIVE" },
+
+      { source:  20791 , target:  86182 , value: "ALTERNATIVE" },
+
+      { source:  21719 , target:  86182 , value: "ALTERNATIVE" },
+
+      { source:  21718 , target:  86182 , value: "ALTERNATIVE" },
+
+      { source:  131587 , target:  86182 , value: "ALTERNATIVE" },
+
+      { source:  81987 , target:  86182 , value: "SEQUEL" },
+
+      { source:  33649 , target:  86182 , value: "PREQUEL" },
+
+      { source:  138258 , target:  86182 , value: "SEQUEL" },
+
+      { source:  87199 , target:  86182 , value: "CHARACTER" },
+
+      { source:  87199 , target:  100855 , value: "ADAPTATION" },
+
+      { source:  356 , target:  100855 , value: "PARENT" },
+
+      { source:  30705 , target:  57327 , value: "PARENT" },
+
+      { source:  30715 , target:  57327 , value: "PARENT" },
+
+      { source:  81987 , target:  57327 , value: "CHARACTER" },
+
+      { source:  33649 , target:  57327 , value: "CHARACTER" },
+
+      { source:  30707 , target:  57327 , value: "CHARACTER" },
+
+      { source:  62425 , target:  57327 , value: "CHARACTER" },
+
+      { source:  87202 , target:  57327 , value: "CHARACTER" },
+
+      { source:  33526 , target:  57327 , value: "CHARACTER" },
+
+      { source:  187572 , target:  57327 , value: "CHARACTER" },
+
+      { source:  30715 , target:  87199 , value: "PARENT" },
+
+      { source:  100855 , target:  87199 , value: "ADAPTATION" },
+
+      { source:  86182 , target:  87199 , value: "CHARACTER" },
+
+      { source:  131587 , target:  87199 , value: "CHARACTER" },
+
+      { source:  81987 , target:  87199 , value: "CHARACTER" },
+
+      { source:  14829 , target:  33526 , value: "ADAPTATION" },
+
+      { source:  85136 , target:  33526 , value: "SEQUEL" },
+
+      { source:  87195 , target:  33526 , value: "ADAPTATION" },
+
+      { source:  30715 , target:  33526 , value: "PARENT" },
+
+      { source:  18851 , target:  33526 , value: "ADAPTATION" },
+
+      { source:  57327 , target:  33526 , value: "CHARACTER" },
+
+      { source:  114017 , target:  33526 , value: "CHARACTER" },
+
+      { source:  30715 , target:  49381 , value: "PARENT" },
+
+      { source:  81987 , target:  49381 , value: "PARENT" },
+
+      { source:  100729 , target:  49381 , value: "ADAPTATION" },
+
+      { source:  30715 , target:  87196 , value: "PARENT" },
+
+      { source:  30705 , target:  87196 , value: "PARENT" },
+
+      { source:  30707 , target:  87196 , value: "PARENT" },
+
+      { source:  81987 , target:  87196 , value: "PARENT" },
+
+      { source:  33649 , target:  87196 , value: "PARENT" },
+
+      { source:  62425 , target:  87196 , value: "PARENT" },
+
+      { source:  87200 , target:  87196 , value: "PARENT" },
+
+      { source:  63005 , target:  87196 , value: "PARENT" },
+
+      { source:  40429 , target:  87196 , value: "PARENT" },
+
+      { source:  87202 , target:  87196 , value: "PARENT" },
+
+      { source:  50006 , target:  87196 , value: "PARENT" },
+
+      { source:  87201 , target:  87196 , value: "CHARACTER" },
+
+      { source:  110297 , target:  87196 , value: "CHARACTER" },
+
+      { source:  108178 , target:  87196 , value: "CHARACTER" },
+
+      { source:  87196 , target:  63005 , value: "SPIN_OFF" },
+
+      { source:  87251 , target:  63005 , value: "ADAPTATION" },
+
+      { source:  80295 , target:  63005 , value: "ALTERNATIVE" },
+
+      { source:  98035 , target:  63005 , value: "ADAPTATION" },
+
+      { source:  30715 , target:  63005 , value: "PARENT" },
+
+      { source:  153991 , target:  63005 , value: "SEQUEL" },
+
+      { source:  94656 , target:  63005 , value: "SEQUEL" },
+
+      { source:  30715 , target:  116144 , value: "PARENT" },
+
+      { source:  30715 , target:  96082 , value: "PARENT" },
+
+      { source:  63005 , target:  80295 , value: "ALTERNATIVE" },
+
+      { source:  30715 , target:  80295 , value: "PARENT" },
+
+      { source:  81987 , target:  108493 , value: "CHARACTER" },
+
+      { source:  87201 , target:  108493 , value: "CHARACTER" },
+
+      { source:  100728 , target:  108493 , value: "CHARACTER" },
+
+      { source:  110297 , target:  108493 , value: "CHARACTER" },
+
+      { source:  30715 , target:  108493 , value: "PARENT" },
+
+      { source:  87196 , target:  50006 , value: "SPIN_OFF" },
+
+      { source:  33649 , target:  50006 , value: "PARENT" },
+
+      { source:  30705 , target:  50006 , value: "CHARACTER" },
+
+      { source:  30715 , target:  50006 , value: "PREQUEL" },
+
+      { source:  85136 , target:  20467 , value: "ADAPTATION" },
+
+      { source:  20845 , target:  20467 , value: "SEQUEL" },
+
+      { source:  20862 , target:  20467 , value: "SIDE_STORY" },
+
+      { source:  20945 , target:  20467 , value: "SIDE_STORY" },
+
+      { source:  18851 , target:  20467 , value: "PREQUEL" },
+
+      { source:  81987 , target:  189907 , value: "PARENT" },
+
+      { source:  87201 , target:  202596 , value: "ALTERNATIVE" },
+
+      { source:  85754 , target:  94656 , value: "PARENT" },
+
+      { source:  63005 , target:  94656 , value: "PREQUEL" },
+
+      { source:  153991 , target:  94656 , value: "SEQUEL" },
+
+      { source:  12565 , target:  71681 , value: "PARENT" },
+
+      { source:  85754 , target:  71681 , value: "CHARACTER" },
+
+      { source:  116756 , target:  100728 , value: "PREQUEL" },
+
+      { source:  108493 , target:  100728 , value: "CHARACTER" },
+
+      { source:  103276 , target:  103277 , value: "PREQUEL" },
+
+      { source:  103275 , target:  103277 , value: "SEQUEL" },
+
+      { source:  108299 , target:  107553 , value: "SEQUEL" },
+
+      { source:  110297 , target:  107553 , value: "PREQUEL" },
+
+      { source:  108178 , target:  107553 , value: "PREQUEL" },
+
+      { source:  103277 , target:  103275 , value: "PREQUEL" },
+
+      { source:  110851 , target:  103275 , value: "PREQUEL" },
+
+      { source:  116756 , target:  103275 , value: "SEQUEL" },
+
+      { source:  110297 , target:  103275 , value: "ALTERNATIVE" },
+
+      { source:  110297 , target:  172591 , value: "OTHER" },
+
+      { source:  108178 , target:  172591 , value: "OTHER" },
+
+      { source:  108178 , target:  181379 , value: "PARENT" },
+
+      { source:  110297 , target:  181379 , value: "PARENT" },
+
+      { source:  57327 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  30707 , target:  30705 , value: "SEQUEL" },
+
+      { source:  87196 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  169 , target:  30705 , value: "ALTERNATIVE" },
+
+      { source:  109431 , target:  30705 , value: "CHARACTER" },
+
+      { source:  75949 , target:  30705 , value: "CHARACTER" },
+
+      { source:  159094 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  146943 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  153100 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  142992 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  161690 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  87202 , target:  30705 , value: "PARENT" },
+
+      { source:  50006 , target:  30705 , value: "CHARACTER" },
+
+      { source:  187572 , target:  30705 , value: "SPIN_OFF" },
+
+      { source:  66131 , target:  85136 , value: "SEQUEL" },
+
+      { source:  33526 , target:  85136 , value: "PREQUEL" },
+
+      { source:  20467 , target:  85136 , value: "ADAPTATION" },
+
+      { source:  20862 , target:  85136 , value: "ADAPTATION" },
+
+      { source:  20845 , target:  85136 , value: "ADAPTATION" },
+
+      { source:  30705 , target:  30707 , value: "PREQUEL" },
+
+      { source:  75949 , target:  30707 , value: "SPIN_OFF" },
+
+      { source:  55629 , target:  30707 , value: "SEQUEL" },
+
+      { source:  87196 , target:  30707 , value: "SPIN_OFF" },
+
+      { source:  109431 , target:  30707 , value: "SPIN_OFF" },
+
+      { source:  57327 , target:  30707 , value: "CHARACTER" },
+
+      { source:  159094 , target:  30707 , value: "ALTERNATIVE" },
+
+      { source:  187572 , target:  30707 , value: "CHARACTER" },
+
+      { source:  87196 , target:  40429 , value: "SPIN_OFF" },
+
+      { source:  57327 , target:  87202 , value: "CHARACTER" },
+
+      { source:  30705 , target:  87202 , value: "OTHER" },
+
+      { source:  63005 , target:  153991 , value: "PREQUEL" },
+
+      { source:  94656 , target:  153991 , value: "PREQUEL" },
+
+      { source:  20467 , target:  20845 , value: "PREQUEL" },
+
+      { source:  21325 , target:  20845 , value: "SIDE_STORY" },
+
+      { source:  21379 , target:  20845 , value: "SEQUEL" },
+
+      { source:  85136 , target:  20845 , value: "ADAPTATION" },
+
+      { source:  20467 , target:  20862 , value: "PARENT" },
+
+      { source:  85136 , target:  20862 , value: "ADAPTATION" },
+
+      { source:  33649 , target:  66803 , value: "PARENT" },
+
+      { source:  11741 , target:  66803 , value: "ADAPTATION" },
+
+      { source:  33649 , target:  75417 , value: "ALTERNATIVE" },
+
+      { source:  103275 , target:  116756 , value: "PREQUEL" },
+
+      { source:  100728 , target:  116756 , value: "SEQUEL" },
+
+      { source:  107554 , target:  108299 , value: "SEQUEL" },
+
+      { source:  107553 , target:  108299 , value: "PREQUEL" },
+
+      { source:  87201 , target:  108299 , value: "CHARACTER" },
+
+      { source:  87200 , target:  108299 , value: "CHARACTER" },
+
+      { source:  103275 , target:  110851 , value: "SEQUEL" },
+
+      { source:  114017 , target:  110851 , value: "ALTERNATIVE" },
+
+      { source:  30705 , target:  169 , value: "ALTERNATIVE" },
+
+      { source:  159094 , target:  169 , value: "CHARACTER" },
+
+      { source:  75949 , target:  159094 , value: "CHARACTER" },
+
+      { source:  30707 , target:  159094 , value: "ALTERNATIVE" },
+
+      { source:  30705 , target:  159094 , value: "PARENT" },
+
+      { source:  169 , target:  159094 , value: "CHARACTER" },
+
+      { source:  55629 , target:  159094 , value: "CHARACTER" },
+
+      { source:  146943 , target:  159094 , value: "CHARACTER" },
+
+      { source:  142992 , target:  159094 , value: "CHARACTER" },
+
+      { source:  153100 , target:  159094 , value: "CHARACTER" },
+
+      { source:  108178 , target:  159094 , value: "CHARACTER" },
+
+      { source:  110297 , target:  159094 , value: "CHARACTER" },
+
+      { source:  187572 , target:  159094 , value: "CHARACTER" },
+
+      { source:  142992 , target:  146943 , value: "CHARACTER" },
+
+      { source:  153100 , target:  146943 , value: "CHARACTER" },
+
+      { source:  159094 , target:  146943 , value: "CHARACTER" },
+
+      { source:  30705 , target:  146943 , value: "PARENT" },
+
+      { source:  187572 , target:  146943 , value: "ALTERNATIVE" },
+
+      { source:  146943 , target:  153100 , value: "CHARACTER" },
+
+      { source:  142992 , target:  153100 , value: "CHARACTER" },
+
+      { source:  159094 , target:  153100 , value: "CHARACTER" },
+
+      { source:  30705 , target:  153100 , value: "PARENT" },
+
+      { source:  187572 , target:  153100 , value: "ALTERNATIVE" },
+
+      { source:  146943 , target:  142992 , value: "CHARACTER" },
+
+      { source:  153100 , target:  142992 , value: "CHARACTER" },
+
+      { source:  159094 , target:  142992 , value: "CHARACTER" },
+
+      { source:  30705 , target:  142992 , value: "PARENT" },
+
+      { source:  187572 , target:  142992 , value: "ALTERNATIVE" },
+
+      { source:  30705 , target:  161690 , value: "PARENT" },
+
+      { source:  30705 , target:  187572 , value: "PARENT" },
+
+      { source:  146943 , target:  187572 , value: "ALTERNATIVE" },
+
+      { source:  142992 , target:  187572 , value: "ALTERNATIVE" },
+
+      { source:  153100 , target:  187572 , value: "ALTERNATIVE" },
+
+      { source:  30707 , target:  187572 , value: "CHARACTER" },
+
+      { source:  57327 , target:  187572 , value: "CHARACTER" },
+
+      { source:  109431 , target:  187572 , value: "CHARACTER" },
+
+      { source:  159094 , target:  187572 , value: "CHARACTER" },
+
+      { source:  55629 , target:  187572 , value: "CHARACTER" },
+
+      { source:  85136 , target:  66131 , value: "PREQUEL" },
+
+      { source:  21379 , target:  66131 , value: "ADAPTATION" },
+
+      { source:  87488 , target:  66131 , value: "ADAPTATION" },
+
+      { source:  97757 , target:  66131 , value: "ADAPTATION" },
+
+      { source:  118743 , target:  66131 , value: "ADAPTATION" },
+
+      { source:  138511 , target:  66131 , value: "ADAPTATION" },
+
+      { source:  30707 , target:  75949 , value: "PARENT" },
+
+      { source:  30715 , target:  75949 , value: "CHARACTER" },
+
+      { source:  30705 , target:  75949 , value: "CHARACTER" },
+
+      { source:  159094 , target:  75949 , value: "CHARACTER" },
+
+      { source:  30707 , target:  55629 , value: "PREQUEL" },
+
+      { source:  109431 , target:  55629 , value: "CHARACTER" },
+
+      { source:  159094 , target:  55629 , value: "CHARACTER" },
+
+      { source:  187572 , target:  55629 , value: "CHARACTER" },
+
+      { source:  30705 , target:  109431 , value: "CHARACTER" },
+
+      { source:  55629 , target:  109431 , value: "CHARACTER" },
+
+      { source:  30707 , target:  109431 , value: "PARENT" },
+
+      { source:  108178 , target:  109431 , value: "CHARACTER" },
+
+      { source:  110297 , target:  109431 , value: "CHARACTER" },
+
+      { source:  62425 , target:  109431 , value: "CHARACTER" },
+
+      { source:  187572 , target:  109431 , value: "CHARACTER" },
+
+      { source:  20845 , target:  21325 , value: "PARENT" },
+
+      { source:  108299 , target:  107554 , value: "PREQUEL" },
+
+      { source:  107555 , target:  107554 , value: "SEQUEL" },
+
+      { source:  110851 , target:  114017 , value: "ALTERNATIVE" },
+
+      { source:  110297 , target:  114017 , value: "CHARACTER" },
+
+      { source:  108178 , target:  114017 , value: "CHARACTER" },
+
+      { source:  33526 , target:  114017 , value: "CHARACTER" },
+
+      { source:  55191 , target:  114017 , value: "CHARACTER" },
+
+      { source:  131587 , target:  114017 , value: "CHARACTER" },
+
+      { source:  20845 , target:  21379 , value: "PREQUEL" },
+
+      { source:  66131 , target:  21379 , value: "ADAPTATION" },
+
+      { source:  87488 , target:  21379 , value: "SIDE_STORY" },
+
+      { source:  118743 , target:  21379 , value: "SEQUEL" },
+
+      { source:  97757 , target:  21379 , value: "SEQUEL" },
+
+      { source:  20467 , target:  20945 , value: "PARENT" },
+
+      { source:  107554 , target:  107555 , value: "PREQUEL" },
+
+      { source:  107556 , target:  107555 , value: "SEQUEL" },
+
+      { source:  66131 , target:  87488 , value: "ADAPTATION" },
+
+      { source:  21379 , target:  87488 , value: "PARENT" },
+
+      { source:  66131 , target:  118743 , value: "ADAPTATION" },
+
+      { source:  97757 , target:  118743 , value: "PREQUEL" },
+
+      { source:  138511 , target:  118743 , value: "SEQUEL" },
+
+      { source:  66131 , target:  97757 , value: "ADAPTATION" },
+
+      { source:  101100 , target:  97757 , value: "SIDE_STORY" },
+
+      { source:  118743 , target:  97757 , value: "SEQUEL" },
+
+      { source:  100269 , target:  97757 , value: "SPIN_OFF" },
+
+      { source:  21379 , target:  97757 , value: "PREQUEL" },
+
+      { source:  107555 , target:  107556 , value: "PREQUEL" },
+
+      { source:  66131 , target:  138511 , value: "ADAPTATION" },
+
+      { source:  118743 , target:  138511 , value: "PREQUEL" },
+
+      { source:  97757 , target:  101100 , value: "PARENT" },
+
+      { source:  66131 , target:  100269 , value: "ADAPTATION" },
+
+      { source:  14829 , target:  100269 , value: "CHARACTER" },
+
+      { source:  97757 , target:  100269 , value: "PARENT" },
+
+      ]
+    };
+    
+    
+    const width = 900;
+    const height = 700;
+    
+    
+    const cardWidth = 120;
+    const cardHeight = 150;
+    const imageSize = 60;
+
+    const tooltip = d3.select("#tooltip");
+
+    
+    const relationshipTypes = [...new Set(graphData.links.map(d => d.value))];
+    const colors = [
+      "#ff7f0e", 
+      "#2ca02c", 
+      "#d62728", 
+      "#9467bd", 
+      "#8c564b", 
+      "#e377c2", 
+    ];
+    
+    const colorScale = d3.scaleOrdinal()
+      .domain(relationshipTypes)
+      .range(colors);
+    
+    
+    const svg = d3.select("#graph")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height]);
+    
+    
+    const zoom = d3.zoom()
+      .scaleExtent([0.5, 3])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+    
+    svg.call(zoom);
+    
+    
+    const g = svg.append("g");
+    
+    
+    const legend = d3.select("#legend");
+    relationshipTypes.forEach(type => {
+      const legendItem = legend.append("div")
+        .attr("class", "legend-item");
+      
+      legendItem.append("div")
+        .attr("class", "legend-color")
+        .style("background-color", colorScale(type));
+      
+      legendItem.append("span")
+        .text(type);
+    });
+    
+    
+    const simulation = d3.forceSimulation(graphData.nodes)
+      .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(300))
+      .force("charge", d3.forceManyBody().strength(-1000))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("x", d3.forceX())
+      .force("y", d3.forceY())
+      .force("collision", d3.forceCollide().radius(cardWidth));
+    
+    
+    const link = g.append("g")
+      .attr("class", "links")
+      .selectAll("line")
+      .data(graphData.links)
+      .enter().append("line")
+      .attr("stroke-width", 3)
+      .attr("stroke", "#999")  
+      .attr("stroke-opacity", 0.6)
+      .attr("data-value", d => d.value)  
+      .attr("class", d => `link-${d.source.id}-${d.target.id}`)
+      .on("mouseover", function(event, d) {
+        
+        
+        tooltip.style("opacity", 1)
+          .html(`${getNodeNameById(d.source.id)} → ${getNodeNameById(d.target.id)}<br>Relation: ${d.value}`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", function() {
+        
+        tooltip.style("opacity", 0);
+      });
+    
+    
+    function getNodeNameById(id) {
+      const node = graphData.nodes.find(n => n.id === id);
+      return node ? node.name : id;
+    }
+    
+    
+    const node = g.append("g")
+      .attr("class", "nodes")
+      .selectAll("g")
+      .data(graphData.nodes)
+      .enter().append("g")
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended))
+      .on("mouseover", function(event, d) {
+        
+        highlightConnections(d.id, true);
+      })
+      .on("mouseout", function(event, d) {
+        
+        highlightConnections(d.id, false);
+      });
+    
+    
+    function highlightConnections(nodeId, highlight) {
+      
+      const sourceLinks = graphData.links.filter(l => 
+        l.source.id === nodeId
+      );
+      
+      
+      if (highlight) {
+        d3.selectAll(".links line")
+          .classed("highlighted", false)
+          .attr("stroke", "#999");
+      }
+      
+      
+      sourceLinks.forEach(l => {
+        const linkElement = d3.select(`.link-${l.source.id}-${l.target.id}`);
+        
+        if (highlight) {
+          
+          linkElement.classed("highlighted", true)
+            .attr("stroke", colorScale(l.value));
+          
+          
+          tooltip.style("opacity", 1)
+            .html(`${getNodeNameById(l.source.id)} → ${getNodeNameById(l.target.id)}<br>Relation: ${l.value}`)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        } else {
+          
+          linkElement.classed("highlighted", false)
+            .attr("stroke", "#999");
+          tooltip.style("opacity", 0);
+        }
+      });
+    }
+    
+    
+    node.append("rect")
+      .attr("class", "node-card")
+      .attr("width", cardWidth)
+      .attr("height", cardHeight)
+      .attr("x", -cardWidth / 2)
+      .attr("y", -cardHeight / 2);
+    
+    
+    node.append("rect")
+      .attr("class", "node-image-bg")
+      .attr("width", imageSize + 10)
+      .attr("height", imageSize + 10)
+      .attr("x", -imageSize / 2 - 5)
+      .attr("y", -cardHeight / 2 + 10);
+    
+    
+    node.append("image")
+      .attr("xlink:href", d => d.image)
+      .attr("width", imageSize)
+      .attr("height", imageSize)
+      .attr("x", -imageSize / 2)
+      .attr("y", -cardHeight / 2 + 15);
+    
+    
+    node.append("text")
+      .attr("class", "node-title")
+      .attr("y", -cardHeight / 2 + imageSize + 30)
+      .attr("x", 0)
+      .text(d => d.name);
+    
+    
+    const statsGroup = node.append("g")
+      .attr("class", "node-stats")
+      .attr("transform", `translate(${-cardWidth/2 + 10}, ${-cardHeight/2 + imageSize + 40})`);
+    
+    
+    function addStatBar(selection, statName, statValue, yPosition) {
+      selection.append("text")
+        .attr("x", 0)
+        .attr("y", yPosition)
+        .attr("dy", "0.8em")
+        .text(statName);
+      
+      selection.append("text")
+        .attr("x", 100)
+        .attr("y", yPosition)
+        .attr("dy", "0.8em")
+        .attr("text-anchor", "end")
+        .attr("font-size", "8px")
+        .text(statValue);
+    }
+    
+    
+    statsGroup.each(function(d) {
+      const selection = d3.select(this);
+      addStatBar(selection, "Episodes", d.stats.episodes, 0);
+      addStatBar(selection, "Duration", d.stats.duration, 15);
+      addStatBar(selection, "Format", d.stats.format, 30);
+    });
+    
+    
+    let labelsVisible = true;
+    
+    d3.select("#toggleLabels").on("click", function() {
+      labelsVisible = !labelsVisible;
+      d3.selectAll(".node-stats").style("opacity", labelsVisible ? 1 : 0);
+      d3.selectAll(".node-title").style("opacity", labelsVisible ? 1 : 0);
+    });
+    
+    
+    d3.select("#resetLayout").on("click", function() {
+      svg.transition().duration(750).call(
+        zoom.transform,
+        d3.zoomIdentity.translate(0, 0).scale(1)
+      );
+      
+      simulation.alpha(1).restart();
+    });
+    
+    
+    simulation.on("tick", () => {
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+      
+      node.attr("transform", d => `translate(${d.x}, ${d.y})`);
+    });
+    
+    
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.3).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+    
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+    
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+    }
+  </script>
+</body>
+</html>

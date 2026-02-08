@@ -264,21 +264,35 @@
 
             progressBar.style.width = '0%';
             barHelper.textContent = 'Starting...';
+            let timeout = 0;
 
             let body = await window.MalainaCreateGraph(aid, (progress) => {
-                if (progress?.error) {
-                    barHelper.textContent = progress.error;
-                    return;
-                }
-
                 const id = progress?.id ?? 0;
                 const seen = Number(progress?.seen ?? 0);
                 const queue = Number(progress?.queue ?? 0);
                 const total = seen + queue;
+                
+                if (progress?.error === "Too Many Requests.") {
+                    timeout = 0;
+                    return;
+                } else if (progress?.error === "Waiting for timeout") {
+                    barHelper.textContent = `Waiting for timeout: ${id} (${seen} / ${total})`;
+                    progressBar.style.width = `${(timeout / 60) * 100}%`;
+                    timeout++;
+                    return;
+                } else if (progress?.error) {
+                    barHelper.textContent = progress.error;
+                    return;
+                }
+
                 const percentage = total === 0 ? 0 : (seen / total) * 100;
                 progressBar.style.width = `${percentage}%`;
                 barHelper.textContent = `Querying: ${id} (${seen} / ${total})`;
             });
+
+            if (body === '') {
+                return;
+            }
 
             barHelper.textContent = 'Finished generating graph. Opening in new tab...';
 
